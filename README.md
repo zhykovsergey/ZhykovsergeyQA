@@ -238,7 +238,7 @@ public class NewPage extends BasePage {
 
 ## 👥 **АВТОРЫ**
 
-- **Ваше имя** - *Основной разработчик* - [GitHub](https://github.com/yourusername)
+- **Sergey Zhukov** - *Основной разработчик* - [GitHub](https://github.com/yourusername)
 
 ## 🙏 **БЛАГОДАРНОСТИ**
 

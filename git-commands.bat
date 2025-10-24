@@ -7,7 +7,7 @@ if "%1"=="add" (
 )
 
 if "%1"=="commit" (
-    "C:\Program Files\Git\bin\git.exe" commit -m "fix: create clean API workflow without Slack notifications"
+    "C:\Program Files\Git\bin\git.exe" commit -m "fix: remove all Slack notifications and create final API workflow"
     goto :eof
 )
 

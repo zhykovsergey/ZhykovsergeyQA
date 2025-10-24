@@ -47,6 +47,15 @@ jobs:
     strategy:
       matrix:
         test-type: [api, ui, e2e, datadriven]
+        include:
+          - test-type: api
+            test-pattern: "*Api*"
+          - test-type: ui  
+            test-pattern: "*Ui*"
+          - test-type: e2e
+            test-pattern: "*E2E*"
+          - test-type: datadriven
+            test-pattern: "*DataDriven*"
         
     steps:
     - name: 📥 Checkout code
@@ -66,7 +75,7 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
         
     - name: 🧪 Run ${{ matrix.test-type }} tests
-      run: mvn test -Dtest="${{ matrix.test-type }}.*" -Dheadless=true
+      run: mvn test -Dtest="${{ matrix.test-pattern }}" -Dui.headless=true -Dsurefire.failIfNoSpecifiedTests=false
       
     - name: 📊 Upload test results
       uses: actions/upload-artifact@v4

@@ -285,16 +285,11 @@ jobs:
           echo "📋 Check the logs for details"
           echo "🔍 Review the Allure report for test results"
 
-      - name: 📱 Send notification to Slack
+      - name: 📱 Notification (Disabled)
         if: always()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          channel: '#test-automation'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          echo "📱 Slack notifications disabled to avoid configuration issues"
+          echo "✅ Check GitHub Actions tab for results"
 
   # ==================== ОЧИСТКА ====================
   cleanup:

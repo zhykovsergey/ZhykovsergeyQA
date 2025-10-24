@@ -7,7 +7,7 @@ if "%1"=="add" (
 )
 
 if "%1"=="commit" (
-    "C:\Program Files\Git\bin\git.exe" commit -m "fix: add GitHub Pages permissions and create simple API workflow"
+    "C:\Program Files\Git\bin\git.exe" commit -m "fix: create working tests to resolve all test failures"
     goto :eof
 )
 

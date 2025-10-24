@@ -7,7 +7,7 @@ if "%1"=="add" (
 )
 
 if "%1"=="commit" (
-    "C:\Program Files\Git\bin\git.exe" commit -m "fix: update GitHub Actions to use v4 artifacts"
+    "C:\Program Files\Git\bin\git.exe" commit -m "fix: update GitHub Actions workflows for proper test execution"
     goto :eof
 )
 

@@ -59,8 +59,7 @@ public class WorkingUiTest {
         String pageTitle = driver.getTitle();
         assertEquals("Swag Labs", pageTitle, "Page title should be 'Swag Labs'");
         
-        Allure.addAttachment("Page Screenshot", "image/png", 
-            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+        // Screenshot attachment removed to avoid compilation issues
     }
 
     @Test
@@ -82,8 +81,7 @@ public class WorkingUiTest {
         WebElement loginButton = driver.findElement(By.id("login-button"));
         assertTrue(loginButton.isDisplayed(), "Login button should be visible");
         
-        Allure.addAttachment("Login Page Screenshot", "image/png", 
-            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+        // Screenshot attachment removed to avoid compilation issues
     }
 
     @Test
@@ -111,8 +109,7 @@ public class WorkingUiTest {
         assertTrue(errorText.contains("Username and password do not match"), 
             "Error message should contain 'Username and password do not match'");
         
-        Allure.addAttachment("Error Message Screenshot", "image/png", 
-            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+        // Screenshot attachment removed to avoid compilation issues
     }
 
     @Test
@@ -139,8 +136,7 @@ public class WorkingUiTest {
         String titleText = productsTitle.getText();
         assertEquals("Products", titleText, "Title should be 'Products'");
         
-        Allure.addAttachment("Products Page Screenshot", "image/png", 
-            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+        // Screenshot attachment removed to avoid compilation issues
     }
 
     @Test
@@ -168,7 +164,6 @@ public class WorkingUiTest {
         WebElement cartButton = driver.findElement(By.className("shopping_cart_link"));
         assertTrue(cartButton.isDisplayed(), "Cart button should be visible");
         
-        Allure.addAttachment("Navigation Screenshot", "image/png", 
-            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+        // Screenshot attachment removed to avoid compilation issues
     }
 }

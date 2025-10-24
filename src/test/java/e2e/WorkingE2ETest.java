@@ -93,8 +93,7 @@ public class WorkingE2ETest {
         WebElement productsTitle = wait.until(ExpectedConditions.presenceOfElementLocated(By.className("title")));
         assertEquals("Products", productsTitle.getText(), "Should be on products page");
         
-        Allure.addAttachment("UI Screenshot", "image/png", 
-            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+        // Screenshot attachment removed to avoid compilation issues
         
         // Шаг 3: Проверяем, что данные из API корректны
         assertNotNull(postTitle, "Post title from API should not be null");
@@ -135,8 +134,7 @@ public class WorkingE2ETest {
         int userCount = apiResponse.jsonPath().getList("").size();
         assertTrue(userCount > 0, "API should return at least one user");
         
-        Allure.addAttachment("UI Elements Screenshot", "image/png", 
-            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+        // Screenshot attachment removed to avoid compilation issues
     }
 
     @Test
@@ -189,8 +187,7 @@ public class WorkingE2ETest {
         int userCount = usersResponse.jsonPath().getList("").size();
         assertTrue(userCount > 0, "API should return users");
         
-        Allure.addAttachment("Full E2E Screenshot", "image/png", 
-            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+        // Screenshot attachment removed to avoid compilation issues
         
         // Шаг 5: Финальная валидация
         assertTrue(postCount > 0 && userCount > 0, "Both API endpoints should return data");

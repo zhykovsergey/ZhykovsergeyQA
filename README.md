@@ -250,7 +250,7 @@ public class NewPage extends BasePage {
 ## 📞 **ПОДДЕРЖКА**
 
 Если у вас есть вопросы или предложения:
-- 📧 Email: your.email@example.com
+- 📧 Email: Zhykovsergey@gmail.com
 - 💬 Slack: #test-automation
 - 🐛 Issues: [GitHub Issues](https://github.com/yourusername/TestNewApi/issues)
 

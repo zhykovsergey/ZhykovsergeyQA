@@ -33,7 +33,7 @@ jobs:
       run: mvn clean compile test-compile
       
     - name: 📊 Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: compiled-classes
         path: target/classes
@@ -69,7 +69,7 @@ jobs:
       run: mvn test -Dtest="${{ matrix.test-type }}.*" -Dheadless=true
       
     - name: 📊 Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results-${{ matrix.test-type }}
@@ -89,7 +89,7 @@ jobs:
       uses: actions/checkout@v4
       
     - name: 📥 Download all test results
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: test-results
         
@@ -103,7 +103,7 @@ jobs:
         allure_history_pattern: allure-history/*
         
     - name: 📤 Upload Allure Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: allure-report
         path: allure-report/
@@ -120,7 +120,7 @@ jobs:
       uses: actions/checkout@v4
       
     - name: 📥 Download Allure Report
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: allure-report
         path: allure-report/

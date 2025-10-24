@@ -7,7 +7,7 @@ if "%1"=="add" (
 )
 
 if "%1"=="commit" (
-    "C:\Program Files\Git\bin\git.exe" commit -m "fix: update GitHub Actions workflows for proper test execution"
+    "C:\Program Files\Git\bin\git.exe" commit -m "fix: improve GitHub Actions workflows and add WebDriverManager support"
     goto :eof
 )
 

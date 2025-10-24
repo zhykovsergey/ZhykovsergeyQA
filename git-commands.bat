@@ -7,7 +7,7 @@ if "%1"=="add" (
 )
 
 if "%1"=="commit" (
-    "C:\Program Files\Git\bin\git.exe" commit -m "fix: resolve compilation errors in UI and E2E tests"
+    "C:\Program Files\Git\bin\git.exe" commit -m "fix: remove problematic screenshot attachments to resolve compilation errors"
     goto :eof
 )
 

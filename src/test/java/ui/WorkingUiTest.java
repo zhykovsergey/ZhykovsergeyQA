@@ -9,8 +9,12 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.OutputType;
 
 import java.time.Duration;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @Epic("UI Testing")
 @Feature("Working UI Tests")
@@ -56,7 +60,7 @@ public class WorkingUiTest {
         assertEquals("Swag Labs", pageTitle, "Page title should be 'Swag Labs'");
         
         Allure.addAttachment("Page Screenshot", "image/png", 
-            ((org.openqa.selenium.TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.BYTES));
+            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
     }
 
     @Test
@@ -79,7 +83,7 @@ public class WorkingUiTest {
         assertTrue(loginButton.isDisplayed(), "Login button should be visible");
         
         Allure.addAttachment("Login Page Screenshot", "image/png", 
-            ((org.openqa.selenium.TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.BYTES));
+            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
     }
 
     @Test
@@ -108,7 +112,7 @@ public class WorkingUiTest {
             "Error message should contain 'Username and password do not match'");
         
         Allure.addAttachment("Error Message Screenshot", "image/png", 
-            ((org.openqa.selenium.TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.BYTES));
+            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
     }
 
     @Test
@@ -136,7 +140,7 @@ public class WorkingUiTest {
         assertEquals("Products", titleText, "Title should be 'Products'");
         
         Allure.addAttachment("Products Page Screenshot", "image/png", 
-            ((org.openqa.selenium.TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.BYTES));
+            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
     }
 
     @Test
@@ -165,6 +169,6 @@ public class WorkingUiTest {
         assertTrue(cartButton.isDisplayed(), "Cart button should be visible");
         
         Allure.addAttachment("Navigation Screenshot", "image/png", 
-            ((org.openqa.selenium.TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.BYTES));
+            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
     }
 }

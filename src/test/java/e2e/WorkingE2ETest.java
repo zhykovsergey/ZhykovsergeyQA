@@ -11,6 +11,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.OutputType;
 
 import java.time.Duration;
 
@@ -92,7 +94,7 @@ public class WorkingE2ETest {
         assertEquals("Products", productsTitle.getText(), "Should be on products page");
         
         Allure.addAttachment("UI Screenshot", "image/png", 
-            ((org.openqa.selenium.TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.BYTES));
+            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
         
         // Шаг 3: Проверяем, что данные из API корректны
         assertNotNull(postTitle, "Post title from API should not be null");
@@ -134,7 +136,7 @@ public class WorkingE2ETest {
         assertTrue(userCount > 0, "API should return at least one user");
         
         Allure.addAttachment("UI Elements Screenshot", "image/png", 
-            ((org.openqa.selenium.TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.BYTES));
+            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
     }
 
     @Test
@@ -188,7 +190,7 @@ public class WorkingE2ETest {
         assertTrue(userCount > 0, "API should return users");
         
         Allure.addAttachment("Full E2E Screenshot", "image/png", 
-            ((org.openqa.selenium.TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.BYTES));
+            ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
         
         // Шаг 5: Финальная валидация
         assertTrue(postCount > 0 && userCount > 0, "Both API endpoints should return data");

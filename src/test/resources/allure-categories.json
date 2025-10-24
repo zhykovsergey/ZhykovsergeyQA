@@ -1,0 +1,40 @@
+[
+  {
+    "name": "Test defects",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*AssertionError.*"
+  },
+  {
+    "name": "Product defects",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*TimeoutException.*"
+  },
+  {
+    "name": "Test defects",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*NoSuchElementException.*"
+  },
+  {
+    "name": "Test defects",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*ElementNotInteractableException.*"
+  },
+  {
+    "name": "Product defects",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*ConnectionException.*"
+  },
+  {
+    "name": "Test defects",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*IllegalArgumentException.*"
+  },
+  {
+    "name": "To investigate",
+    "matchedStatuses": ["broken"]
+  },
+  {
+    "name": "Skipped tests",
+    "matchedStatuses": ["skipped"]
+  }
+]

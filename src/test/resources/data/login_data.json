@@ -1,0 +1,39 @@
+{
+  "loginData": [
+    {
+      "username": "standard_user",
+      "password": "secret_sauce",
+      "shouldLogin": true,
+      "expectedPage": "Products",
+      "description": "Valid user login"
+    },
+    {
+      "username": "locked_out_user",
+      "password": "secret_sauce",
+      "shouldLogin": false,
+      "expectedPage": "Login",
+      "description": "Locked out user"
+    },
+    {
+      "username": "problem_user",
+      "password": "secret_sauce",
+      "shouldLogin": true,
+      "expectedPage": "Products",
+      "description": "Problem user login"
+    },
+    {
+      "username": "performance_glitch_user",
+      "password": "secret_sauce",
+      "shouldLogin": true,
+      "expectedPage": "Products",
+      "description": "Performance glitch user"
+    },
+    {
+      "username": "invalid_user",
+      "password": "invalid_password",
+      "shouldLogin": false,
+      "expectedPage": "Login",
+      "description": "Invalid credentials"
+    }
+  ]
+}

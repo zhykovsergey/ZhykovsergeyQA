@@ -1,0 +1,6 @@
+username,password,userType,expectedBehavior
+standard_user,secret_sauce,normal,success
+locked_out_user,secret_sauce,locked,locked
+problem_user,secret_sauce,problematic,problem
+performance_glitch_user,secret_sauce,slow,success
+visual_user,secret_sauce,visual,success

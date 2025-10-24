@@ -1,0 +1,32 @@
+{
+  "configurations": [
+    {
+      "configName": "Headless Mode",
+      "browserMode": "headless",
+      "testType": "smoke",
+      "shouldPass": true,
+      "description": "Headless browser testing"
+    },
+    {
+      "configName": "Visible Mode",
+      "browserMode": "visible",
+      "testType": "regression",
+      "shouldPass": true,
+      "description": "Visible browser testing"
+    },
+    {
+      "configName": "Mobile Mode",
+      "browserMode": "mobile",
+      "testType": "mobile",
+      "shouldPass": true,
+      "description": "Mobile browser testing"
+    },
+    {
+      "configName": "Tablet Mode",
+      "browserMode": "tablet",
+      "testType": "tablet",
+      "shouldPass": true,
+      "description": "Tablet browser testing"
+    }
+  ]
+}

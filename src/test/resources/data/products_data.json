@@ -1,0 +1,40 @@
+{
+  "products": [
+    {
+      "name": "Sauce Labs Backpack",
+      "price": "$29.99",
+      "category": "backpack",
+      "description": "A classic backpack for your everyday adventures"
+    },
+    {
+      "name": "Sauce Labs Bike Light",
+      "price": "$9.99",
+      "category": "light",
+      "description": "A bright light for your bike"
+    },
+    {
+      "name": "Sauce Labs Bolt T-Shirt",
+      "price": "$15.99",
+      "category": "shirt",
+      "description": "A comfortable t-shirt for any occasion"
+    },
+    {
+      "name": "Sauce Labs Fleece Jacket",
+      "price": "$49.99",
+      "category": "jacket",
+      "description": "A warm fleece jacket for cold days"
+    },
+    {
+      "name": "Sauce Labs Onesie",
+      "price": "$7.99",
+      "category": "onesie",
+      "description": "A cozy onesie for babies"
+    },
+    {
+      "name": "Test.allTheThings() T-Shirt (Red)",
+      "price": "$15.99",
+      "category": "shirt",
+      "description": "A red t-shirt for testing"
+    }
+  ]
+}

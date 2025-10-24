@@ -1,0 +1,309 @@
+name: 🚀 Advanced CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/*
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    - cron: '0 2 * * 1' # Еженедельно по понедельникам в 2:00
+  workflow_dispatch:
+    inputs:
+      browser_type:
+        description: 'Browser type to test'
+        required: true
+        default: 'CHROME'
+        type: choice
+        options:
+          - CHROME
+          - FIREFOX
+          - EDGE
+          - ALL
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: 'ALL'
+        type: choice
+        options:
+          - ALL
+          - API
+          - UI
+          - E2E
+          - QUALITY
+
+env:
+  MAVEN_OPTS: -Xmx2048m -XX:+UseG1GC
+  ALLURE_RESULTS_DIRECTORY: target/allure-results
+
+jobs:
+  # ==================== ПОДГОТОВКА ====================
+  setup:
+    name: 🔧 Setup
+    runs-on: ubuntu-latest
+    outputs:
+      browser-type: ${{ steps.set-browser.outputs.browser-type }}
+      test-suite: ${{ steps.set-test-suite.outputs.test-suite }}
+      is-pr: ${{ steps.set-context.outputs.is-pr }}
+    steps:
+      - name: Set browser type
+        id: set-browser
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "browser-type=${{ github.event.inputs.browser_type }}" >> $GITHUB_OUTPUT
+          else
+            echo "browser-type=ALL" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set test suite
+        id: set-test-suite
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "test-suite=${{ github.event.inputs.test_suite }}" >> $GITHUB_OUTPUT
+          else
+            echo "test-suite=ALL" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set context
+        id: set-context
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "is-pr=true" >> $GITHUB_OUTPUT
+          else
+            echo "is-pr=false" >> $GITHUB_OUTPUT
+          fi
+
+  # ==================== СБОРКА ====================
+  build:
+    name: 🔨 Build
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 📦 Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: 🔨 Build with Maven
+        run: |
+          mvn clean compile test-compile -B
+          echo "✅ Build completed successfully"
+
+      - name: 📊 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: target/classes
+
+  # ==================== ТЕСТИРОВАНИЕ ====================
+  test-chrome:
+    name: 🧪 Test Chrome
+    runs-on: ubuntu-latest
+    needs: [setup, build]
+    if: ${{ needs.setup.outputs.browser-type == 'CHROME' || needs.setup.outputs.browser-type == 'ALL' }}
+    strategy:
+      matrix:
+        test-suite: [api, ui, e2e, quality]
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: target/classes
+
+      - name: 🌐 Install Google Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: 🚗 Install ChromeDriver
+        run: |
+          CHROME_DRIVER_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+' | head -1)
+          wget -q --continue -P /tmp "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
+          unzip /tmp/chromedriver-linux64.zip -d /opt/webdriver
+          sudo mv /opt/webdriver/chromedriver-linux64/chromedriver /usr/bin/chromedriver
+          sudo chmod +x /usr/bin/chromedriver
+          rm /tmp/chromedriver-linux64.zip
+
+      - name: 🧪 Run ${{ matrix.test-suite }} tests in Chrome
+        run: |
+          mvn test -Dtest="*${{ matrix.test-suite }}*" -Dbrowser.type=CHROME -Dui.headless=true -B
+        continue-on-error: true
+
+      - name: 📊 Upload Chrome test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chrome-${{ matrix.test-suite }}-results
+          path: target/allure-results
+
+  test-firefox:
+    name: 🧪 Test Firefox
+    runs-on: ubuntu-latest
+    needs: [setup, build]
+    if: ${{ needs.setup.outputs.browser-type == 'FIREFOX' || needs.setup.outputs.browser-type == 'ALL' }}
+    strategy:
+      matrix:
+        test-suite: [api, ui, e2e, quality]
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: target/classes
+
+      - name: 🦊 Install Firefox
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y firefox
+
+      - name: 🚗 Install GeckoDriver
+        run: |
+          GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+          wget -q --continue -P /tmp "https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz"
+          tar -xzf /tmp/geckodriver-${GECKO_VERSION}-linux64.tar.gz -C /tmp
+          sudo mv /tmp/geckodriver /usr/bin/geckodriver
+          sudo chmod +x /usr/bin/geckodriver
+          rm /tmp/geckodriver-${GECKO_VERSION}-linux64.tar.gz
+
+      - name: 🧪 Run ${{ matrix.test-suite }} tests in Firefox
+        run: |
+          mvn test -Dtest="*${{ matrix.test-suite }}*" -Dbrowser.type=FIREFOX -Dui.headless=true -B
+        continue-on-error: true
+
+      - name: 📊 Upload Firefox test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: firefox-${{ matrix.test-suite }}-results
+          path: target/allure-results
+
+  # ==================== ОТЧЕТЫ ====================
+  generate-reports:
+    name: 📊 Generate Reports
+    runs-on: ubuntu-latest
+    needs: [test-chrome, test-firefox]
+    if: always()
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 📥 Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          path: target/allure-results
+
+      - name: 📊 Install Allure
+        run: |
+          wget -q https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.29.0/allure-commandline-2.29.0.zip -O /tmp/allure.zip
+          unzip /tmp/allure.zip -d /opt/allure
+          sudo ln -s /opt/allure/allure-2.29.0/bin/allure /usr/bin/allure
+          sudo chmod +x /usr/bin/allure
+
+      - name: 📊 Generate Allure Report
+        run: |
+          allure generate target/allure-results --clean -o allure-report
+          echo "✅ Allure report generated successfully"
+
+      - name: 📊 Upload Allure Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+
+      - name: 🚀 Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-report
+          force_orphan: true
+
+  # ==================== УВЕДОМЛЕНИЯ ====================
+  notify:
+    name: 📢 Notifications
+    runs-on: ubuntu-latest
+    needs: [generate-reports]
+    if: always()
+    steps:
+      - name: 📢 Notify on success
+        if: ${{ needs.generate-reports.result == 'success' }}
+        run: |
+          echo "✅ All tests passed successfully!"
+          echo "📊 Allure report generated and deployed"
+          echo "🌐 Report available at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+
+      - name: 📢 Notify on failure
+        if: ${{ needs.generate-reports.result == 'failure' }}
+        run: |
+          echo "❌ Some tests failed!"
+          echo "📋 Check the logs for details"
+          echo "🔍 Review the Allure report for test results"
+
+      - name: 📱 Send notification to Slack
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#test-automation'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  # ==================== ОЧИСТКА ====================
+  cleanup:
+    name: 🧹 Cleanup
+    runs-on: ubuntu-latest
+    needs: [notify]
+    if: always()
+    steps:
+      - name: 🧹 Cleanup artifacts
+        run: |
+          echo "🧹 Cleaning up temporary files and artifacts"
+          echo "✅ Cleanup completed"

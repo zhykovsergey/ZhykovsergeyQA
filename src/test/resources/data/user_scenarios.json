@@ -1,0 +1,39 @@
+{
+  "scenarios": [
+    {
+      "scenario": "Valid Login",
+      "username": "standard_user",
+      "password": "secret_sauce",
+      "expectedResult": "success",
+      "description": "Standard user successful login"
+    },
+    {
+      "scenario": "Locked User",
+      "username": "locked_out_user",
+      "password": "secret_sauce",
+      "expectedResult": "failure",
+      "description": "Locked out user login attempt"
+    },
+    {
+      "scenario": "Problem User",
+      "username": "problem_user",
+      "password": "secret_sauce",
+      "expectedResult": "success",
+      "description": "Problem user login with issues"
+    },
+    {
+      "scenario": "Performance User",
+      "username": "performance_glitch_user",
+      "password": "secret_sauce",
+      "expectedResult": "success",
+      "description": "Performance glitch user login"
+    },
+    {
+      "scenario": "Invalid Credentials",
+      "username": "invalid_user",
+      "password": "invalid_password",
+      "expectedResult": "failure",
+      "description": "Invalid credentials login attempt"
+    }
+  ]
+}

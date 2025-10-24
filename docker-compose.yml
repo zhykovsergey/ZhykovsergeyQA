@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # Основной сервис для запуска тестов
+  test-runner:
+    build: .
+    container_name: testnewapi-runner
+    volumes:
+      - ./target/allure-results:/app/target/allure-results
+      - ./target/surefire-reports:/app/target/surefire-reports
+    environment:
+      - MAVEN_OPTS=-Xmx1024m -XX:MaxPermSize=256m
+      - DISPLAY=:99
+    command: mvn test -Dheadless=true
+    networks:
+      - test-network
+
+  # Сервис для генерации Allure отчетов
+  allure-generator:
+    image: frankescobar/allure-docker-service
+    container_name: allure-generator
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./target/allure-results:/app/allure-results
+    environment:
+      - CHECK_RESULTS_EVERY_SECONDS=3
+      - KEEP_HISTORY=1
+    networks:
+      - test-network
+    depends_on:
+      - test-runner
+
+  # Сервис для просмотра отчетов
+  allure-ui:
+    image: frankescobar/allure-docker-service-ui
+    container_name: allure-ui
+    ports:
+      - "5252:5252"
+    environment:
+      - ALLURE_DOCKER_PUBLIC_API_URL=http://allure-generator:5050
+    networks:
+      - test-network
+    depends_on:
+      - allure-generator
+
+networks:
+  test-network:
+    driver: bridge
+
+volumes:
+  allure-results:
+  surefire-reports:

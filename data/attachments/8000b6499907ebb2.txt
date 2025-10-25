@@ -1,0 +1,3 @@
+Ожидалось: This is a test post body content
+Фактически: This is a test post body content
+Сообщение: Тело созданного поста должно соответствовать

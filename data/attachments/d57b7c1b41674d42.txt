@@ -1,0 +1,2 @@
+API does not require authentication for public endpoints
+This is expected behavior for a demo API

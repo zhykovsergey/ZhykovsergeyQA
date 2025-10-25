@@ -1,0 +1,3 @@
+Ожидалось: не пустая строка
+Фактически: 'sunt aut facere repellat provident occaecati excepturi optio reprehenderit'
+Сообщение: Заголовок поста не должен быть пустым

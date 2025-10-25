@@ -1,0 +1,5 @@
+Total Requests: 10
+Successful: 10
+Success Rate: 100.00%
+Average Response Time: 46.20 ms
+Total Time: 462 ms

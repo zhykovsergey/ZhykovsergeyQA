@@ -1,0 +1,2 @@
+Tested 4 SQL injection payloads
+API properly handles malicious requests

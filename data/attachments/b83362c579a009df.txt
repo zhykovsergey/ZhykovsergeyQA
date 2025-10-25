@@ -1,0 +1,3 @@
+Free Memory: 50601904 bytes
+Total Memory: 100663296 bytes
+Max Memory: 4194304000 bytes

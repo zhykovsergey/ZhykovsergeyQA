@@ -1,0 +1,6 @@
+{
+  "id": 1,
+  "title": "Updated Post",
+  "body": "This post has been updated",
+  "userId": 1
+}

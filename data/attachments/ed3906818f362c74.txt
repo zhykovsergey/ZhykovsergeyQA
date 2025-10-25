@@ -1,0 +1,2 @@
+Tested 4 XSS payloads
+API properly handles malicious requests

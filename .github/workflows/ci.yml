@@ -52,6 +52,12 @@ jobs:
         distribution: 'temurin'
         cache: maven
         
+    - name: 🌐 Set up Chrome
+      if: contains(fromJson('["ui", "e2e"]'), matrix.test-group)
+      uses: browser-actions/setup-chrome@v1
+      with:
+        browser-version: latest
+        
     - name: 🧪 Run ${{ matrix.test-group }} tests
       run: |
         case "${{ matrix.test-group }}" in
@@ -59,7 +65,7 @@ jobs:
             mvn test -Dtest="api.SimpleApiTest,api.CommentsApiTest,api.ImprovedApiTest,api.ImprovedQualityApiTest,api.ImprovedStableApiTest,api.JsonPlaceholderApiTest,api.WorkingApiTest,api.ExtendedApiTest,api.ReqResApiTest" -Dheadless=true
             ;;
           "ui")
-            mvn test -Dtest="ui.WorkingUiTest" -Dheadless=true
+            mvn test -Dtest="ui.WorkingUiTest" -Dheadless=true -DforkCount=1 -DreuseForks=false
             ;;
           "e2e")
             mvn test -Dtest="e2e.WorkingE2ETest" -Dheadless=true

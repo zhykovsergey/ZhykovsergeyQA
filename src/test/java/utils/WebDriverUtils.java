@@ -72,6 +72,19 @@ public class WebDriverUtils {
         options.addArguments("--disable-web-security");
         options.addArguments("--disable-features=VizDisplayCompositor");
         
+        // Добавляем уникальный user-data-dir для CI/CD среды
+        String uniqueUserDataDir = "/tmp/chrome-user-data-" + System.currentTimeMillis() + "-" + Thread.currentThread().getId();
+        options.addArguments("--user-data-dir=" + uniqueUserDataDir);
+        
+        // Дополнительные аргументы для стабильности в CI/CD
+        options.addArguments("--disable-background-timer-throttling");
+        options.addArguments("--disable-backgrounding-occluded-windows");
+        options.addArguments("--disable-renderer-backgrounding");
+        options.addArguments("--disable-features=TranslateUI");
+        options.addArguments("--disable-ipc-flooding-protection");
+        options.addArguments("--remote-debugging-port=0");
+        options.addArguments("--disable-background-networking");
+        
         // Отключаем логи
         System.setProperty("webdriver.chrome.silentOutput", "true");
         System.setProperty("org.slf4j.simpleLogger.log.org.openqa.selenium", "ERROR");

@@ -1,85 +1,122 @@
 package utils;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.openqa.selenium.JavascriptExecutor;
 
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Утилитарный класс для настройки WebDriver
+ * Утилиты для работы с WebDriver
  */
 public class WebDriverUtils {
 
-    private static final int DEFAULT_TIMEOUT_SECONDS = 10;
+    /**
+     * Создать WebDriver с настройками
+     */
+    public static WebDriver createWebDriver(boolean headless) {
+        String browser = Config.getBrowser().toLowerCase();
+        
+        switch (browser) {
+            case "chrome":
+                return createChromeDriver(headless);
+            case "firefox":
+                return createFirefoxDriver(headless);
+            case "edge":
+                return createEdgeDriver(headless);
+            default:
+                return createChromeDriver(headless);
+        }
+    }
 
     /**
-     * Создать WebDriver с видимым браузером
+     * Создать WebDriver с настройками по умолчанию
      */
     public static WebDriver createWebDriver() {
         return createWebDriver(false);
     }
 
     /**
-     * Создать WebDriver с настройками
-     * @param headless true для headless режима, false для видимого браузера
+     * Создать Chrome WebDriver
      */
-    public static WebDriver createWebDriver(boolean headless) {
-        // Подавление логов Selenium
-        System.setProperty("webdriver.chrome.silentOutput", "true");
-        System.setProperty("org.slf4j.simpleLogger.log.org.openqa.selenium", "ERROR");
-        
+    private static WebDriver createChromeDriver(boolean headless) {
         WebDriverManager.chromedriver().setup();
         
         ChromeOptions options = new ChromeOptions();
-        
-        // Базовые настройки
         if (headless) {
-            options.addArguments("--headless=new");
+            options.addArguments("--headless");
         }
-        
-        // Обязательные настройки для стабильности
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
-        options.addArguments("--start-maximized");
-        
-        // Отключение сохранения паролей через preferences
-        Map<String, Object> prefs = new HashMap<>();
-        prefs.put("credentials_enable_service", false);
-        prefs.put("profile.password_manager_enabled", false);
-        options.setExperimentalOption("prefs", prefs);
-        
-        // Отключение уведомлений и инфобаров
-        options.addArguments("--disable-notifications");
-        options.addArguments("--disable-infobars");
         options.addArguments("--disable-extensions");
+        options.addArguments("--disable-logging");
+        options.addArguments("--disable-web-security");
+        options.addArguments("--allow-running-insecure-content");
+        options.addArguments("--ignore-certificate-errors");
+        options.addArguments("--ignore-ssl-errors");
+        options.addArguments("--ignore-certificate-errors-spki-list");
+        options.addArguments("--ignore-certificate-errors-spki-list");
+        options.addArguments("--ignore-ssl-errors");
+        options.addArguments("--ignore-certificate-errors");
+        options.addArguments("--allow-running-insecure-content");
+        options.addArguments("--disable-web-security");
+        options.addArguments("--disable-features=VizDisplayCompositor");
         
-        // Обход детекции автоматизации
-        options.addArguments("--disable-blink-features=AutomationControlled");
-        options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
-        options.setExperimentalOption("useAutomationExtension", false);
+        // Отключаем логи
+        System.setProperty("webdriver.chrome.silentOutput", "true");
+        System.setProperty("org.slf4j.simpleLogger.log.org.openqa.selenium", "ERROR");
         
-        WebDriver driver = new ChromeDriver(options);
+        return new ChromeDriver(options);
+    }
+
+    /**
+     * Создать Firefox WebDriver
+     */
+    private static WebDriver createFirefoxDriver(boolean headless) {
+        WebDriverManager.firefoxdriver().setup();
         
-        // Неявное ожидание
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(DEFAULT_TIMEOUT_SECONDS));
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+        FirefoxOptions options = new FirefoxOptions();
+        if (headless) {
+            options.addArguments("--headless");
+        }
+        options.addArguments("--width=1920");
+        options.addArguments("--height=1080");
         
-        return driver;
+        return new FirefoxDriver(options);
+    }
+
+    /**
+     * Создать Edge WebDriver
+     */
+    private static WebDriver createEdgeDriver(boolean headless) {
+        WebDriverManager.edgedriver().setup();
+        
+        EdgeOptions options = new EdgeOptions();
+        if (headless) {
+            options.addArguments("--headless");
+        }
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--window-size=1920,1080");
+        
+        return new EdgeDriver(options);
     }
 
     /**
      * Создать WebDriverWait
      */
     public static WebDriverWait createWebDriverWait(WebDriver driver) {
-        return createWebDriverWait(driver, DEFAULT_TIMEOUT_SECONDS);
+        return createWebDriverWait(driver, Config.getTimeout());
     }
 
     /**
@@ -97,56 +134,6 @@ public class WebDriverUtils {
     }
 
     /**
-     * Получить заголовок страницы
-     */
-    public static String getPageTitle(WebDriver driver) {
-        return driver.getTitle();
-    }
-
-    /**
-     * Получить текущий URL
-     */
-    public static String getCurrentUrl(WebDriver driver) {
-        return driver.getCurrentUrl();
-    }
-
-    /**
-     * Ожидание загрузки страницы
-     */
-    public static void waitForPageLoad(WebDriver driver) {
-        try {
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-            js.executeScript("return document.readyState").equals("complete");
-        } catch (Exception e) {
-            // Игнорируем ошибки JavaScript
-        }
-    }
-
-    /**
-     * Ожидание элемента с retry механизмом
-     */
-    public static void waitForElement(WebDriver driver, org.openqa.selenium.By locator, int timeoutSeconds) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
-        wait.until(org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated(locator));
-    }
-
-    /**
-     * Ожидание кликабельности элемента
-     */
-    public static void waitForElementClickable(WebDriver driver, org.openqa.selenium.By locator, int timeoutSeconds) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
-        wait.until(org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable(locator));
-    }
-
-    /**
-     * Ожидание видимости элемента
-     */
-    public static void waitForElementVisible(WebDriver driver, org.openqa.selenium.By locator, int timeoutSeconds) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
-        wait.until(org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated(locator));
-    }
-
-    /**
      * Выполнить JavaScript
      */
     public static Object executeJavaScript(WebDriver driver, String script, Object... args) {
@@ -155,31 +142,17 @@ public class WebDriverUtils {
     }
 
     /**
-     * Прокрутить страницу вниз
+     * Прокрутить вниз
      */
     public static void scrollDown(WebDriver driver) {
-        executeJavaScript(driver, "window.scrollBy(0, 500);");
+        executeJavaScript(driver, "window.scrollTo(0, document.body.scrollHeight);");
     }
 
     /**
-     * Прокрутить страницу вверх
+     * Прокрутить вверх
      */
     public static void scrollUp(WebDriver driver) {
-        executeJavaScript(driver, "window.scrollBy(0, -500);");
-    }
-
-    /**
-     * Прокрутить к элементу
-     */
-    public static void scrollToElement(WebDriver driver, org.openqa.selenium.WebElement element) {
-        executeJavaScript(driver, "arguments[0].scrollIntoView(true);", element);
-    }
-
-    /**
-     * Очистить cookies
-     */
-    public static void clearCookies(WebDriver driver) {
-        driver.manage().deleteAllCookies();
+        executeJavaScript(driver, "window.scrollTo(0, 0);");
     }
 
     /**
@@ -197,35 +170,81 @@ public class WebDriverUtils {
     }
 
     /**
-     * Получить размер окна
+     * Очистить cookies
      */
-    public static org.openqa.selenium.Dimension getWindowSize(WebDriver driver) {
-        return driver.manage().window().getSize();
+    public static void clearCookies(WebDriver driver) {
+        driver.manage().deleteAllCookies();
     }
 
     /**
-     * Установить размер окна
+     * Ждать элемент
      */
-    public static void setWindowSize(WebDriver driver, int width, int height) {
-        driver.manage().window().setSize(new org.openqa.selenium.Dimension(width, height));
+    public static void waitForElementVisible(WebDriver driver, By locator, int timeoutSeconds) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
+        wait.until(org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
     /**
-     * Максимизировать окно
+     * Ждать элемент (по умолчанию)
      */
-    public static void maximizeWindow(WebDriver driver) {
-        driver.manage().window().maximize();
+    public static void waitForElementVisible(WebDriver driver, By locator) {
+        waitForElementVisible(driver, locator, Config.getTimeout());
     }
 
     /**
-     * Проверить, загружена ли страница
+     * Ждать кликабельность элемента
      */
-    public static boolean isPageLoaded(WebDriver driver) {
-        try {
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-            return js.executeScript("return document.readyState").equals("complete");
-        } catch (Exception e) {
-            return false;
-        }
+    public static void waitForElementClickable(WebDriver driver, By locator, int timeoutSeconds) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
+        wait.until(org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable(locator));
+    }
+
+    /**
+     * Ждать кликабельность элемента (по умолчанию)
+     */
+    public static void waitForElementClickable(WebDriver driver, By locator) {
+        waitForElementClickable(driver, locator, Config.getTimeout());
+    }
+
+    /**
+     * Ждать загрузки страницы
+     */
+    public static void waitForPageLoad(WebDriver driver) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(Config.getPageLoadTimeout()));
+        wait.until(webDriver -> executeJavaScript(webDriver, "return document.readyState").equals("complete"));
+    }
+
+    /**
+     * Получить информацию о браузере
+     */
+    public static Map<String, Object> getBrowserInfo(WebDriver driver) {
+        Map<String, Object> info = new HashMap<>();
+        info.put("browser", driver.getClass().getSimpleName());
+        info.put("title", driver.getTitle());
+        info.put("url", driver.getCurrentUrl());
+        info.put("windowSize", driver.manage().window().getSize());
+        return info;
+    }
+
+    /**
+     * Ждать URL содержит текст
+     */
+    public static void waitForUrlContains(WebDriver driver, String urlPart, int timeoutSeconds) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
+        wait.until(org.openqa.selenium.support.ui.ExpectedConditions.urlContains(urlPart));
+    }
+
+    /**
+     * Получить заголовок страницы
+     */
+    public static String getPageTitle(WebDriver driver) {
+        return driver.getTitle();
+    }
+
+    /**
+     * Получить текущий URL
+     */
+    public static String getCurrentUrl(WebDriver driver) {
+        return driver.getCurrentUrl();
     }
 }

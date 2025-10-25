@@ -26,9 +26,14 @@ public abstract class BaseUiTest {
         wait = WebDriverUtils.createWebDriverWait(driver, Config.getTimeout());
         
         // Прикрепляем информацию о браузере к Allure
-        AllureUtils.addBrowserMetrics(driver);
-        AllureUtils.addMemoryMetrics();
-        AllureUtils.addTimestamp();
+        Allure.addAttachment("Browser Info", "text/plain", 
+            "Browser: " + driver.getClass().getSimpleName());
+        Allure.addAttachment("Memory Metrics", "text/plain", 
+            "Free Memory: " + Runtime.getRuntime().freeMemory() + " bytes\n" +
+            "Total Memory: " + Runtime.getRuntime().totalMemory() + " bytes\n" +
+            "Max Memory: " + Runtime.getRuntime().maxMemory() + " bytes");
+        Allure.addAttachment("Test Timestamp", "text/plain", 
+            "Test started at: " + java.time.LocalDateTime.now());
         
         // Прикрепляем конфигурацию
         String configInfo = String.format(
@@ -49,17 +54,33 @@ public abstract class BaseUiTest {
             try {
                 // Прикрепляем метрики времени выполнения
                 long testEndTime = System.currentTimeMillis();
-                AllureUtils.addExecutionTime(testStartTime, testEndTime);
+                long executionTime = testEndTime - testStartTime;
+                Allure.addAttachment("Execution Time", "text/plain", 
+                    "Test execution time: " + executionTime + " ms");
                 
                 // Делаем финальный скриншот
-                AllureUtils.attachScreenshot(driver, "Final Screenshot");
+                try {
+                    byte[] screenshot = ((org.openqa.selenium.TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.BYTES);
+                    Allure.addAttachment("Final Screenshot", "image/png", new java.io.ByteArrayInputStream(screenshot), "png");
+                } catch (Exception e) {
+                    Allure.addAttachment("Screenshot Error", "text/plain", "Failed to take screenshot: " + e.getMessage());
+                }
                 
                 // Прикрепляем информацию о странице
-                AllureUtils.attachPageSource(driver, "Final Page State");
+                try {
+                    String pageSource = driver.getPageSource();
+                    Allure.addAttachment("Final Page State", "text/html", pageSource);
+                } catch (Exception e) {
+                    Allure.addAttachment("Page Source Error", "text/plain", "Failed to get page source: " + e.getMessage());
+                }
                 
                 // Прикрепляем финальные метрики
-                AllureUtils.addMemoryMetrics();
-                AllureUtils.addTimestamp();
+                Allure.addAttachment("Memory Metrics", "text/plain", 
+                    "Free Memory: " + Runtime.getRuntime().freeMemory() + " bytes\n" +
+                    "Total Memory: " + Runtime.getRuntime().totalMemory() + " bytes\n" +
+                    "Max Memory: " + Runtime.getRuntime().maxMemory() + " bytes");
+                Allure.addAttachment("Test Timestamp", "text/plain", 
+                    "Test ended at: " + java.time.LocalDateTime.now());
                 
             } catch (Exception e) {
                 Allure.addAttachment("Error in tearDown", 
@@ -76,35 +97,46 @@ public abstract class BaseUiTest {
      */
     @Step("Ожидание загрузки страницы")
     protected void waitForPageLoad() {
-        WaitUtils.waitForPageLoad(driver);
+        wait.until(webDriver -> 
+            ((org.openqa.selenium.JavascriptExecutor) webDriver)
+                .executeScript("return document.readyState").equals("complete"));
     }
     
     /**
      * Ожидание элемента с повторными попытками
      */
     protected void waitForElementWithRetry(org.openqa.selenium.By locator, int maxRetries) {
-        WaitUtils.waitForElementWithRetry(driver, locator, maxRetries);
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                wait.until(org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated(locator));
+                return;
+            } catch (Exception e) {
+                if (i == maxRetries - 1) throw e;
+                try { Thread.sleep(1000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+            }
+        }
     }
     
     /**
      * Ожидание элемента с кастомным таймаутом
      */
     protected void waitForElement(org.openqa.selenium.By locator, int timeoutSeconds) {
-        WaitUtils.waitForElement(driver, locator, timeoutSeconds);
+        WebDriverWait customWait = new WebDriverWait(driver, java.time.Duration.ofSeconds(timeoutSeconds));
+        customWait.until(org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated(locator));
     }
     
     /**
      * Ожидание видимости элемента
      */
     protected void waitForElementVisible(org.openqa.selenium.By locator) {
-        WaitUtils.waitForElementVisible(driver, locator);
+        wait.until(org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated(locator));
     }
     
     /**
      * Ожидание кликабельности элемента
      */
     protected void waitForElementClickable(org.openqa.selenium.By locator) {
-        WaitUtils.waitForElementClickable(driver, locator);
+        wait.until(org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable(locator));
     }
 
     /**
@@ -112,8 +144,7 @@ public abstract class BaseUiTest {
      */
     @Step("Переход на страницу: {url}")
     protected void navigateTo(String url) {
-        AllureUtils.navigateStep(url);
-        WebDriverUtils.openUrl(driver, url);
+        driver.get(url);
         waitForPageLoad();
         
         // Прикрепляем информацию о навигации
@@ -127,14 +158,23 @@ public abstract class BaseUiTest {
     @Step("Выполнение действия: {action}")
     protected void logAction(String action) {
         Allure.addAttachment("Action Log", "text/plain", 
-            "Action: " + action + "\nTimestamp: " + AllureUtils.getCurrentTimestamp());
+            "Action: " + action + "\nTimestamp: " + java.time.LocalDateTime.now());
     }
 
     /**
      * Вспомогательный метод для прикрепления ошибок
      */
     protected void attachError(Throwable error) {
-        AllureUtils.attachErrorDetails(driver, error);
+        try {
+            byte[] screenshot = ((org.openqa.selenium.TakesScreenshot) driver).getScreenshotAs(org.openqa.selenium.OutputType.BYTES);
+            Allure.addAttachment("Error Screenshot", "image/png", new java.io.ByteArrayInputStream(screenshot), "png");
+        } catch (Exception e) {
+            Allure.addAttachment("Screenshot Error", "text/plain", "Failed to take error screenshot: " + e.getMessage());
+        }
+        Allure.addAttachment("Error Details", "text/plain", 
+            "Error: " + error.getClass().getSimpleName() + "\n" +
+            "Message: " + error.getMessage() + "\n" +
+            "Stack Trace: " + java.util.Arrays.toString(error.getStackTrace()));
     }
 }
 

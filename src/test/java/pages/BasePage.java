@@ -1,6 +1,7 @@
 package pages;
 
 import io.qameta.allure.Step;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
@@ -9,6 +10,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import utils.WebDriverUtils;
 
 import java.time.Duration;
+import java.util.List;
 
 /**
  * Базовый класс для всех Page Object классов
@@ -130,5 +132,59 @@ public abstract class BasePage {
     protected void takeScreenshot() {
         // Скриншот будет автоматически добавлен в Allure отчет
         // при использовании AllureRestAssuredFilter
+    }
+
+    /**
+     * Найти элемент по локатору
+     */
+    @Step("Найти элемент по локатору")
+    protected WebElement findElement(By locator) {
+        return driver.findElement(locator);
+    }
+
+    /**
+     * Найти элементы по локатору
+     */
+    @Step("Найти элементы по локатору")
+    protected List<WebElement> findElements(By locator) {
+        return driver.findElements(locator);
+    }
+
+    /**
+     * Ждать видимости элемента по локатору
+     */
+    @Step("Ждать видимости элемента по локатору")
+    protected void waitForElementVisible(By locator) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+
+    /**
+     * Ждать кликабельности элемента по локатору
+     */
+    @Step("Ждать кликабельности элемента по локатору")
+    protected void waitForClickable(By locator) {
+        wait.until(ExpectedConditions.elementToBeClickable(locator));
+    }
+
+    /**
+     * Кликнуть по элементу по локатору
+     */
+    @Step("Кликнуть по элементу по локатору")
+    protected void clickElement(By locator) {
+        waitForClickable(locator);
+        findElement(locator).click();
+    }
+
+    /**
+     * Проверить, что элемент отображается по локатору
+     */
+    @Step("Проверить отображение элемента по локатору")
+    protected boolean isElementDisplayed(By locator) {
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+            return findElement(locator).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

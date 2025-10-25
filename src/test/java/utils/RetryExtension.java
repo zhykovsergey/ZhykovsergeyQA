@@ -1,8 +1,10 @@
 package utils;
 
-import io.qameta.allure.Allure;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -10,73 +12,89 @@ import java.lang.annotation.Target;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Extension для retry механизма при падении тестов
+ * Расширение для повторного выполнения тестов при падении
  */
-public class RetryExtension implements TestExecutionExceptionHandler {
+public class RetryExtension implements TestExecutionExceptionHandler, BeforeEachCallback, AfterEachCallback {
 
-    private static final AtomicInteger retryCount = new AtomicInteger(0);
+    private static final String RETRY_COUNT_KEY = "retryCount";
 
     @Override
     public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable {
-        RetryOnFailure retryAnnotation = context.getRequiredTestMethod().getAnnotation(RetryOnFailure.class);
-        
-        if (retryAnnotation != null) {
-            int currentAttempt = retryCount.incrementAndGet();
-            int maxAttempts = retryAnnotation.maxAttempts();
-            
-            Allure.addAttachment("Retry Attempt", "text/plain", 
-                String.format("Попытка %d из %d\nОшибка: %s", currentAttempt, maxAttempts, throwable.getMessage()));
-            
-            if (currentAttempt < maxAttempts) {
-                // Вычисляем задержку с экспоненциальным ростом
-                long delay = calculateDelay(retryAnnotation, currentAttempt);
-                
-                Allure.addAttachment("Retry Info", "text/plain", 
-                    String.format("Тест упал, повторяем попытку %d из %d через %d мс", 
-                        currentAttempt + 1, maxAttempts, delay));
-                
-                // Ждем перед повторной попыткой
-                Thread.sleep(delay);
-                
-                // Не пробрасываем исключение, позволяем тесту повториться
-                return;
-            } else {
-                Allure.addAttachment("Retry Failed", "text/plain", 
-                    String.format("Все %d попыток исчерпаны. Тест падает окончательно.", maxAttempts));
+        AtomicInteger retryCount = getRetryCount(context);
+        int maxAttempts = getMaxAttempts(context);
+        long delayMs = getDelayMs(context);
+
+        if (retryCount.get() < maxAttempts) {
+            retryCount.incrementAndGet();
+            context.getStore(ExtensionContext.Namespace.create(RetryExtension.class))
+                .put(RETRY_COUNT_KEY, retryCount);
+
+            System.out.printf("Test failed, retrying (%d/%d) in %d ms...%n", 
+                retryCount.get(), maxAttempts, delayMs);
+
+            try {
+                Thread.sleep(delayMs);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
             }
+
+            // Не выбрасываем исключение, позволяем тесту повториться
+            return;
         }
-        
-        // Пробрасываем исключение, если retry не настроен или попытки исчерпаны
+
+        // Если исчерпаны все попытки, выбрасываем исключение
         throw throwable;
     }
 
-    /**
-     * Вычисляет задержку с экспоненциальным ростом
-     */
-    private long calculateDelay(RetryOnFailure annotation, int attempt) {
-        long baseDelay = annotation.delayMs();
-        
-        if (annotation.exponentialBackoff()) {
-            // Экспоненциальная задержка: baseDelay * 2^(attempt-1)
-            return baseDelay * (long) Math.pow(2, attempt - 1);
-        } else {
-            // Линейная задержка
-            return baseDelay;
-        }
+    @Override
+    public void beforeEach(ExtensionContext context) throws Exception {
+        // Сбрасываем счетчик попыток для каждого теста
+        context.getStore(ExtensionContext.Namespace.create(RetryExtension.class))
+            .put(RETRY_COUNT_KEY, new AtomicInteger(0));
     }
 
+    @Override
+    public void afterEach(ExtensionContext context) throws Exception {
+        // Очищаем данные после теста
+        context.getStore(ExtensionContext.Namespace.create(RetryExtension.class))
+            .remove(RETRY_COUNT_KEY);
+    }
+
+    private AtomicInteger getRetryCount(ExtensionContext context) {
+        return context.getStore(ExtensionContext.Namespace.create(RetryExtension.class))
+            .getOrComputeIfAbsent(RETRY_COUNT_KEY, key -> new AtomicInteger(0), AtomicInteger.class);
+    }
+
+    private int getMaxAttempts(ExtensionContext context) {
+        RetryOnFailure annotation = context.getRequiredTestMethod().getAnnotation(RetryOnFailure.class);
+        if (annotation != null) {
+            return annotation.maxAttempts();
+        }
+        return 3; // По умолчанию
+    }
+
+    private long getDelayMs(ExtensionContext context) {
+        RetryOnFailure annotation = context.getRequiredTestMethod().getAnnotation(RetryOnFailure.class);
+        if (annotation != null) {
+            long baseDelay = annotation.delayMs();
+            if (annotation.exponentialBackoff()) {
+                AtomicInteger retryCount = getRetryCount(context);
+                return baseDelay * (long) Math.pow(2, retryCount.get());
+            }
+            return baseDelay;
+        }
+        return 1000; // По умолчанию 1 секунда
+    }
 
     /**
-     * Аннотация для настройки retry механизма
+     * Аннотация для настройки повторных попыток
      */
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface RetryOnFailure {
         int maxAttempts() default 3;
         long delayMs() default 1000;
-        boolean exponentialBackoff() default true;
-        String description() default "Retry on failure";
+        boolean exponentialBackoff() default false;
     }
-
 }
-

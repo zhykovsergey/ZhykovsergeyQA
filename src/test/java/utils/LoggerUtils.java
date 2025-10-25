@@ -298,3 +298,4 @@ public class LoggerUtils {
         Allure.addAttachment("Configuration", "text/plain", message);
     }
 }
+

@@ -1,55 +1,64 @@
 @echo off
 echo ========================================
-echo 🚀 TestNewApi - Запуск всех тестов
+echo    Complete Test Suite Runner
 echo ========================================
 echo.
 
-REM Проверяем наличие Java
-java -version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo ❌ Java не найдена! Установите Java 17+
-    pause
-    exit /b 1
-)
-
-REM Проверяем наличие Maven
-mvn -version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo ❌ Maven не найден! Установите Maven 3.6+
-    pause
-    exit /b 1
-)
-
-echo ✅ Java и Maven найдены
+echo Starting Complete Test Suite...
 echo.
 
-REM Очищаем предыдущие результаты
-echo 🧹 Очистка предыдущих результатов...
-call mvn clean
+REM Set environment variables
+set MAVEN_OPTS=-Xmx4g -Xms2g
+set PARALLEL_ENABLED=true
+set THREAD_COUNT=4
 
-REM Запускаем все тесты
-echo 🧪 Запуск всех тестов...
-call mvn test -Dheadless=true
-
-REM Проверяем результат
-if %errorlevel% equ 0 (
-    echo.
-    echo ✅ Все тесты выполнены успешно!
-    echo.
-    echo 📊 Генерация Allure отчета...
-    call mvn allure:report
-    
-    echo.
-    echo 🎉 Отчет сгенерирован в target/allure-report/
-    echo 📂 Откройте target/allure-report/index.html в браузере
-) else (
-    echo.
-    echo ❌ Некоторые тесты завершились с ошибками
-    echo 📋 Проверьте логи в target/surefire-reports/
-)
+echo Running API Tests...
+mvn test -Dtest="api.*" ^
+    -Dallure.results.directory=target/allure-results
 
 echo.
+echo Running UI Tests...
+mvn test -Dtest="ui.*" ^
+    -Dheadless=true ^
+    -Dallure.results.directory=target/allure-results
+
+echo.
+echo Running E2E Tests...
+mvn test -Dtest="e2e.*" ^
+    -Dheadless=true ^
+    -Dallure.results.directory=target/allure-results
+
+echo.
+echo Running Performance Tests...
+mvn test -Dtest="performance.*" ^
+    -Dperformance.enabled=true ^
+    -Dallure.results.directory=target/allure-results
+
+echo.
+echo Running Security Tests...
+mvn test -Dtest="security.*" ^
+    -Dsecurity.enabled=true ^
+    -Dallure.results.directory=target/allure-results
+
+echo.
+echo Running Data-Driven Tests...
+mvn test -Dtest="datadriven.*" ^
+    -Dallure.results.directory=target/allure-results
+
+echo.
+echo All tests completed!
+echo.
+
+REM Generate comprehensive Allure report
+if exist "target\allure-results" (
+    echo Generating comprehensive Allure report...
+    allure generate target/allure-results -o target/allure-report --clean
+    echo Allure report generated in target/allure-report
+    echo.
+    echo To view the report, run: allure serve target/allure-results
+)
+
 echo ========================================
-echo 🏁 Выполнение завершено
+echo    Complete Test Suite Finished
 echo ========================================
 pause

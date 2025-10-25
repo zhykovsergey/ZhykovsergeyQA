@@ -8,6 +8,7 @@ import utils.TestTag;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static io.qameta.allure.Allure.step;
 
 /**
  * API тесты для JSONPlaceholder
@@ -24,16 +25,18 @@ public class JsonPlaceholderApiTest extends BaseTest {
     @DisplayName("Получить все посты")
     @Description("Проверяем получение списка всех постов")
     public void testGetAllPosts() {
-        given()
-            .when()
-                .get("/posts")
-            .then()
-                .statusCode(200)
-                .body("size()", greaterThan(0))
-                .body("[0].id", notNullValue())
-                .body("[0].title", notNullValue())
-                .body("[0].body", notNullValue())
-                .body("[0].userId", notNullValue());
+        step("Отправляем GET запрос для получения всех постов", () -> {
+            given()
+                .when()
+                    .get("/posts")
+                .then()
+                    .statusCode(200)
+                    .body("size()", greaterThan(0))
+                    .body("[0].id", notNullValue())
+                    .body("[0].title", notNullValue())
+                    .body("[0].body", notNullValue())
+                    .body("[0].userId", notNullValue());
+        });
     }
 
     @Test
@@ -42,15 +45,17 @@ public class JsonPlaceholderApiTest extends BaseTest {
     @DisplayName("Получить пост по ID")
     @Description("Проверяем получение конкретного поста")
     public void testGetPostById() {
-        given()
-            .when()
-                .get("/posts/1")
-            .then()
-                .statusCode(200)
-                .body("id", equalTo(1))
-                .body("userId", equalTo(1))
-                .body("title", notNullValue())
-                .body("body", notNullValue());
+        step("Отправляем GET запрос для получения поста с ID = 1", () -> {
+            given()
+                .when()
+                    .get("/posts/1")
+                .then()
+                    .statusCode(200)
+                    .body("id", equalTo(1))
+                    .body("userId", equalTo(1))
+                    .body("title", notNullValue())
+                    .body("body", notNullValue());
+        });
     }
 
     @Test
@@ -59,25 +64,37 @@ public class JsonPlaceholderApiTest extends BaseTest {
     @DisplayName("Создать новый пост")
     @Description("Проверяем создание нового поста")
     public void testCreatePost() {
-        String requestBody = """
-            {
-                "title": "Test Post Title",
-                "body": "This is a test post body",
-                "userId": 1
-            }
-            """;
+        step("Подготавливаем данные для создания нового поста", () -> {
+            String requestBody = """
+                {
+                    "title": "Test Post Title",
+                    "body": "This is a test post body",
+                    "userId": 1
+                }
+                """;
+        });
+        
+        step("Отправляем POST запрос для создания нового поста", () -> {
+            String requestBody = """
+                {
+                    "title": "Test Post Title",
+                    "body": "This is a test post body",
+                    "userId": 1
+                }
+                """;
 
-        given()
-            .body(requestBody)
-            .contentType("application/json")
-            .when()
-                .post("/posts")
-            .then()
-                .statusCode(201)
-                .body("id", notNullValue())
-                .body("title", equalTo("Test Post Title"))
-                .body("body", equalTo("This is a test post body"))
-                .body("userId", equalTo(1));
+            given()
+                .body(requestBody)
+                .contentType("application/json")
+                .when()
+                    .post("/posts")
+                .then()
+                    .statusCode(201)
+                    .body("id", notNullValue())
+                    .body("title", equalTo("Test Post Title"))
+                    .body("body", equalTo("This is a test post body"))
+                    .body("userId", equalTo(1));
+        });
     }
 
     @Test

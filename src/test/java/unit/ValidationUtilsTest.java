@@ -295,3 +295,4 @@ public class ValidationUtilsTest {
         assertTrue(result.getAllErrorsAsString().contains("Error 2"));
     }
 }
+

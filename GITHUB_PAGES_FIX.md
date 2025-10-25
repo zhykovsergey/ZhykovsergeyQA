@@ -81,3 +81,4 @@ fatal: unable to access 'https://github.com/zhykovsergey/ZhykovsergeyQA.git/': T
 ---
 
 **🎯 После настройки GitHub Pages ваши Allure отчеты будут доступны публично!** 🚀
+

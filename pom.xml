@@ -14,6 +14,11 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
+        <!-- Parallel execution settings -->
+        <parallel.tests>methods</parallel.tests>
+        <thread.count>4</thread.count>
+        <perCoreThreadCount>true</perCoreThreadCount>
+        
         <junit.version>5.10.0</junit.version>
         <restassured.version>5.4.0</restassured.version>
         <selenium.version>4.15.0</selenium.version>

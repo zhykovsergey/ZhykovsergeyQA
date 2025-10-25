@@ -49,3 +49,4 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "🏁 Выполнение завершено" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Read-Host "Нажмите Enter для выхода"
+

@@ -151,4 +151,18 @@ public class SauceDemoCartPage extends BasePage {
     public boolean areItemsDisplayed() {
         return cartItems.size() > 0;
     }
+
+    @Step("Проверить, что товар в корзине")
+    public boolean isProductInCart() {
+        return cartItems.size() > 0;
+    }
+
+    @Step("Удалить первый товар из корзины")
+    public void removeFirstProduct() {
+        if (cartItems.size() > 0) {
+            WebElement removeButton = cartItems.get(0).findElement(org.openqa.selenium.By.xpath(".//button[contains(text(), 'Remove')]"));
+            removeButton.click();
+        }
+    }
+
 }

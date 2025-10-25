@@ -1,53 +1,65 @@
 version: '3.8'
 
 services:
-  # Основной сервис для запуска тестов
-  test-runner:
+  test-automation:
     build: .
-    container_name: testnewapi-runner
-    volumes:
-      - ./target/allure-results:/app/target/allure-results
-      - ./target/surefire-reports:/app/target/surefire-reports
+    container_name: test-automation-framework
     environment:
-      - MAVEN_OPTS=-Xmx1024m -XX:MaxPermSize=256m
-      - DISPLAY=:99
-    command: mvn test -Dheadless=true
+      - HEADLESS=true
+      - BROWSER=chrome
+      - API_BASE_URL=https://jsonplaceholder.typicode.com
+      - UI_BASE_URL=https://www.saucedemo.com
+    volumes:
+      - ./target:/app/target
+      - ./allure-results:/app/target/allure-results
     networks:
       - test-network
 
-  # Сервис для генерации Allure отчетов
-  allure-generator:
+  allure-server:
     image: frankescobar/allure-docker-service
-    container_name: allure-generator
-    ports:
-      - "5050:5050"
-    volumes:
-      - ./target/allure-results:/app/allure-results
+    container_name: allure-server
     environment:
       - CHECK_RESULTS_EVERY_SECONDS=3
       - KEEP_HISTORY=1
-    networks:
-      - test-network
-    depends_on:
-      - test-runner
-
-  # Сервис для просмотра отчетов
-  allure-ui:
-    image: frankescobar/allure-docker-service-ui
-    container_name: allure-ui
     ports:
-      - "5252:5252"
-    environment:
-      - ALLURE_DOCKER_PUBLIC_API_URL=http://allure-generator:5050
+      - "5050:5050"
+    volumes:
+      - ./allure-results:/app/allure-results
     networks:
       - test-network
     depends_on:
-      - allure-generator
+      - test-automation
+
+  selenium-hub:
+    image: selenium/hub:4.15.0
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+    networks:
+      - test-network
+
+  chrome:
+    image: selenium/node-chrome:4.15.0
+    container_name: chrome-node
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+    depends_on:
+      - selenium-hub
+    networks:
+      - test-network
+
+  firefox:
+    image: selenium/node-firefox:4.15.0
+    container_name: firefox-node
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+    depends_on:
+      - selenium-hub
+    networks:
+      - test-network
 
 networks:
   test-network:
     driver: bridge
-
-volumes:
-  allure-results:
-  surefire-reports:

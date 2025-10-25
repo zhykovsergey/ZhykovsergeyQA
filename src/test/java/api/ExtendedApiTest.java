@@ -15,6 +15,7 @@ import utils.SchemaValidator;
 import static io.restassured.RestAssured.given;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.*;
+import static io.qameta.allure.Allure.step;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -32,18 +33,20 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Получить пост с валидацией JSON схемы")
     @Description("Проверяем получение поста и валидацию структуры данных")
     public void testGetPostWithSchemaValidation() {
-        given()
-            .when()
-                .get("/posts/1")
-            .then()
-                .statusCode(200)
-                .body(matchesJsonSchemaInClasspath(SchemaValidator.getPostSchemaPath()))
-                .body("id", equalTo(1))
-                .body("userId", equalTo(1))
-                .body("title", notNullValue())
-                .body("body", notNullValue())
-                .body("title", not(emptyString()))
-                .body("body", not(emptyString()));
+        step("Отправляем GET запрос для получения поста с ID = 1", () -> {
+            given()
+                .when()
+                    .get("/posts/1")
+                .then()
+                    .statusCode(200)
+                    .body(matchesJsonSchemaInClasspath(SchemaValidator.getPostSchemaPath()))
+                    .body("id", equalTo(1))
+                    .body("userId", equalTo(1))
+                    .body("title", notNullValue())
+                    .body("body", notNullValue())
+                    .body("title", not(emptyString()))
+                    .body("body", not(emptyString()));
+        });
     }
 
     @Test
@@ -52,16 +55,18 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Получить все посты")
     @Description("Проверяем получение списка всех постов")
     public void testGetAllPosts() {
-        given()
-            .when()
-                .get("/posts")
-            .then()
-                .statusCode(200)
-                .body("size()", greaterThan(0))
-                .body("id", everyItem(notNullValue()))
-                .body("userId", everyItem(notNullValue()))
-                .body("title", everyItem(notNullValue()))
-                .body("body", everyItem(notNullValue()));
+        step("Отправляем GET запрос для получения всех постов", () -> {
+            given()
+                .when()
+                    .get("/posts")
+                .then()
+                    .statusCode(200)
+                    .body("size()", greaterThan(0))
+                    .body("id", everyItem(notNullValue()))
+                    .body("userId", everyItem(notNullValue()))
+                    .body("title", everyItem(notNullValue()))
+                    .body("body", everyItem(notNullValue()));
+        });
     }
 
     @Test
@@ -70,19 +75,25 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Создать новый пост")
     @Description("Проверяем создание нового поста")
     public void testCreatePost() {
-        Post newPost = Post.createValidPost();
+        step("Подготавливаем данные для создания нового поста", () -> {
+            Post newPost = Post.createValidPost();
+        });
         
-        given()
-            .contentType("application/json")
-            .body(newPost)
-            .when()
-                .post("/posts")
-            .then()
-                .statusCode(201)
-                .body("id", notNullValue())
-                .body("userId", equalTo(newPost.getUserId()))
-                .body("title", equalTo(newPost.getTitle()))
-                .body("body", equalTo(newPost.getBody()));
+        step("Отправляем POST запрос для создания нового поста", () -> {
+            Post newPost = Post.createValidPost();
+            
+            given()
+                .contentType("application/json")
+                .body(newPost)
+                .when()
+                    .post("/posts")
+                .then()
+                    .statusCode(201)
+                    .body("id", notNullValue())
+                    .body("userId", equalTo(newPost.getUserId()))
+                    .body("title", equalTo(newPost.getTitle()))
+                    .body("body", equalTo(newPost.getBody()));
+        });
     }
 
     @Test
@@ -91,23 +102,34 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Обновить пост")
     @Description("Проверяем обновление существующего поста")
     public void testUpdatePost() {
-        Post updatedPost = Post.builder()
-                .id(1)
-                .userId(1)
-                .title("Updated Post Title")
-                .body("Updated post body content")
-                .build();
+        step("Подготавливаем данные для обновления поста", () -> {
+            Post updatedPost = Post.builder()
+                    .id(1)
+                    .userId(1)
+                    .title("Updated Post Title")
+                    .body("Updated post body content")
+                    .build();
+        });
         
-        given()
-            .contentType("application/json")
-            .body(updatedPost)
-            .when()
-                .put("/posts/1")
-            .then()
-                .statusCode(200)
-                .body("id", equalTo(1))
-                .body("title", equalTo("Updated Post Title"))
-                .body("body", equalTo("Updated post body content"));
+        step("Отправляем PUT запрос для обновления поста", () -> {
+            Post updatedPost = Post.builder()
+                    .id(1)
+                    .userId(1)
+                    .title("Updated Post Title")
+                    .body("Updated post body content")
+                    .build();
+            
+            given()
+                .contentType("application/json")
+                .body(updatedPost)
+                .when()
+                    .put("/posts/1")
+                .then()
+                    .statusCode(200)
+                    .body("id", equalTo(1))
+                    .body("title", equalTo("Updated Post Title"))
+                    .body("body", equalTo("Updated post body content"));
+        });
     }
 
     @Test
@@ -116,18 +138,20 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Получить пользователя с валидацией схемы")
     @Description("Проверяем получение пользователя и валидацию структуры")
     public void testGetUserWithSchemaValidation() {
-        given()
-            .when()
-                .get("/users/1")
-            .then()
-                .statusCode(200)
-                .body(matchesJsonSchemaInClasspath(SchemaValidator.getUserSchemaPath()))
-                .body("id", equalTo(1))
-                .body("name", notNullValue())
-                .body("username", notNullValue())
-                .body("email", notNullValue())
-                .body("address", notNullValue())
-                .body("company", notNullValue());
+        step("Отправляем GET запрос для получения пользователя с ID = 1", () -> {
+            given()
+                .when()
+                    .get("/users/1")
+                .then()
+                    .statusCode(200)
+                    .body(matchesJsonSchemaInClasspath(SchemaValidator.getUserSchemaPath()))
+                    .body("id", equalTo(1))
+                    .body("name", notNullValue())
+                    .body("username", notNullValue())
+                    .body("email", notNullValue())
+                    .body("address", notNullValue())
+                    .body("company", notNullValue());
+        });
     }
 
     @Test
@@ -136,17 +160,19 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Получить комментарии к посту")
     @Description("Проверяем получение комментариев для конкретного поста")
     public void testGetPostComments() {
-        given()
-            .when()
-                .get("/posts/1/comments")
-            .then()
-                .statusCode(200)
-                .body("size()", greaterThan(0))
-                .body("postId", everyItem(equalTo(1)))
-                .body("id", everyItem(notNullValue()))
-                .body("name", everyItem(notNullValue()))
-                .body("email", everyItem(notNullValue()))
-                .body("body", everyItem(notNullValue()));
+        step("Отправляем GET запрос для получения комментариев к посту с ID = 1", () -> {
+            given()
+                .when()
+                    .get("/posts/1/comments")
+                .then()
+                    .statusCode(200)
+                    .body("size()", greaterThan(0))
+                    .body("postId", everyItem(equalTo(1)))
+                    .body("id", everyItem(notNullValue()))
+                    .body("name", everyItem(notNullValue()))
+                    .body("email", everyItem(notNullValue()))
+                    .body("body", everyItem(notNullValue()));
+        });
     }
 
     // ==================== НЕГАТИВНЫЕ ТЕСТЫ ====================
@@ -157,11 +183,13 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Получить несуществующий пост (404)")
     @Description("Проверяем обработку ошибки при запросе несуществующего поста")
     public void testGetNonExistentPost() {
-        given()
-            .when()
-                .get("/posts/999999")
-            .then()
-                .statusCode(404);
+        step("Отправляем GET запрос для получения несуществующего поста", () -> {
+            given()
+                .when()
+                    .get("/posts/999999")
+                .then()
+                    .statusCode(404);
+        });
     }
 
     @Test
@@ -170,15 +198,21 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Создать пост с невалидными данными")
     @Description("Проверяем обработку невалидных данных при создании поста")
     public void testCreatePostWithInvalidData() {
-        Post invalidPost = Post.createInvalidPost();
+        step("Подготавливаем невалидные данные для поста", () -> {
+            Post invalidPost = Post.createInvalidPost();
+        });
         
-        given()
-            .contentType("application/json")
-            .body(invalidPost)
-            .when()
-                .post("/posts")
-            .then()
-                .statusCode(400);
+        step("Отправляем POST запрос с невалидными данными", () -> {
+            Post invalidPost = Post.createInvalidPost();
+            
+            given()
+                .contentType("application/json")
+                .body(invalidPost)
+                .when()
+                    .post("/posts")
+                .then()
+                    .statusCode(400);
+        });
     }
 
     @Test
@@ -187,15 +221,21 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Обновить несуществующий пост")
     @Description("Проверяем обработку ошибки при обновлении несуществующего поста")
     public void testUpdateNonExistentPost() {
-        Post post = Post.createValidPost();
+        step("Подготавливаем данные для обновления", () -> {
+            Post post = Post.createValidPost();
+        });
         
-        given()
-            .contentType("application/json")
-            .body(post)
-            .when()
-                .put("/posts/999999")
-            .then()
-                .statusCode(404);
+        step("Отправляем PUT запрос для обновления несуществующего поста", () -> {
+            Post post = Post.createValidPost();
+            
+            given()
+                .contentType("application/json")
+                .body(post)
+                .when()
+                    .put("/posts/999999")
+                .then()
+                    .statusCode(404);
+        });
     }
 
     @Test
@@ -204,11 +244,13 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Удалить несуществующий пост")
     @Description("Проверяем обработку ошибки при удалении несуществующего поста")
     public void testDeleteNonExistentPost() {
-        given()
-            .when()
-                .delete("/posts/999999")
-            .then()
-                .statusCode(404);
+        step("Отправляем DELETE запрос для удаления несуществующего поста", () -> {
+            given()
+                .when()
+                    .delete("/posts/999999")
+                .then()
+                    .statusCode(404);
+        });
     }
 
     @Test
@@ -217,11 +259,13 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Запрос с неверным HTTP методом")
     @Description("Проверяем обработку неверного HTTP метода")
     public void testInvalidHttpMethod() {
-        given()
-            .when()
-                .patch("/posts/1") // PATCH не поддерживается
-            .then()
-                .statusCode(405); // Method Not Allowed
+        step("Отправляем PATCH запрос (неподдерживаемый метод) к посту", () -> {
+            given()
+                .when()
+                    .patch("/posts/1") // PATCH не поддерживается
+                .then()
+                    .statusCode(405); // Method Not Allowed
+        });
     }
 
     // ==================== ПАРАМЕТРИЗОВАННЫЕ ТЕСТЫ ====================
@@ -233,15 +277,17 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Получить пост по ID (параметризованный)")
     @Description("Проверяем получение постов с разными ID")
     public void testGetPostById(int postId) {
-        given()
-            .when()
-                .get("/posts/" + postId)
-            .then()
-                .statusCode(200)
-                .body("id", equalTo(postId))
-                .body("userId", notNullValue())
-                .body("title", notNullValue())
-                .body("body", notNullValue());
+        step("Отправляем GET запрос для получения поста с ID = " + postId, () -> {
+            given()
+                .when()
+                    .get("/posts/" + postId)
+                .then()
+                    .statusCode(200)
+                    .body("id", equalTo(postId))
+                    .body("userId", notNullValue())
+                    .body("title", notNullValue())
+                    .body("body", notNullValue());
+        });
     }
 
     @ParameterizedTest
@@ -251,15 +297,17 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Получить пользователя по ID (параметризованный)")
     @Description("Проверяем получение пользователей с разными ID")
     public void testGetUserById(int userId) {
-        given()
-            .when()
-                .get("/users/" + userId)
-            .then()
-                .statusCode(200)
-                .body("id", equalTo(userId))
-                .body("name", notNullValue())
-                .body("username", notNullValue())
-                .body("email", notNullValue());
+        step("Отправляем GET запрос для получения пользователя с ID = " + userId, () -> {
+            given()
+                .when()
+                    .get("/users/" + userId)
+                .then()
+                    .statusCode(200)
+                    .body("id", equalTo(userId))
+                    .body("name", notNullValue())
+                    .body("username", notNullValue())
+                    .body("email", notNullValue());
+        });
     }
 
     // ==================== ТЕСТЫ ПРОИЗВОДИТЕЛЬНОСТИ ====================
@@ -270,12 +318,14 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Проверка времени ответа API")
     @Description("Проверяем, что API отвечает в разумное время")
     public void testApiResponseTime() {
-        given()
-            .when()
-                .get("/posts")
-            .then()
-                .statusCode(200)
-                .time(lessThan(2000L)); // Ответ должен быть быстрее 2 секунд
+        step("Отправляем GET запрос для получения всех постов и проверяем время ответа", () -> {
+            given()
+                .when()
+                    .get("/posts")
+                .then()
+                    .statusCode(200)
+                    .time(lessThan(2000L)); // Ответ должен быть быстрее 2 секунд
+        });
     }
 
     @Test
@@ -284,12 +334,14 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Проверка времени ответа для пользователя")
     @Description("Проверяем время ответа при получении пользователя")
     public void testUserResponseTime() {
-        given()
-            .when()
-                .get("/users/1")
-            .then()
-                .statusCode(200)
-                .time(lessThan(1000L)); // Ответ должен быть быстрее 1 секунды
+        step("Отправляем GET запрос для получения пользователя и проверяем время ответа", () -> {
+            given()
+                .when()
+                    .get("/users/1")
+                .then()
+                    .statusCode(200)
+                    .time(lessThan(1000L)); // Ответ должен быть быстрее 1 секунды
+        });
     }
 
     // ==================== CONTRACT TESTS ====================
@@ -300,16 +352,18 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Проверка контракта API для поста")
     @Description("Проверяем, что API соответствует ожидаемому контракту")
     public void testPostContract() {
-        given()
-            .when()
-                .get("/posts/1")
-            .then()
-                .statusCode(200)
-                .body(matchesJsonSchemaInClasspath(SchemaValidator.getPostSchemaPath()))
-                .body("id", instanceOf(Integer.class))
-                .body("userId", instanceOf(Integer.class))
-                .body("title", instanceOf(String.class))
-                .body("body", instanceOf(String.class));
+        step("Отправляем GET запрос для получения поста и проверяем контракт API", () -> {
+            given()
+                .when()
+                    .get("/posts/1")
+                .then()
+                    .statusCode(200)
+                    .body(matchesJsonSchemaInClasspath(SchemaValidator.getPostSchemaPath()))
+                    .body("id", instanceOf(Integer.class))
+                    .body("userId", instanceOf(Integer.class))
+                    .body("title", instanceOf(String.class))
+                    .body("body", instanceOf(String.class));
+        });
     }
 
     @Test
@@ -318,15 +372,17 @@ public class ExtendedApiTest extends BaseTest {
     @DisplayName("Проверка контракта API для пользователя")
     @Description("Проверяем, что API пользователя соответствует контракту")
     public void testUserContract() {
-        given()
-            .when()
-                .get("/users/1")
-            .then()
-                .statusCode(200)
-                .body(matchesJsonSchemaInClasspath(SchemaValidator.getUserSchemaPath()))
-                .body("id", instanceOf(Integer.class))
-                .body("name", instanceOf(String.class))
-                .body("username", instanceOf(String.class))
-                .body("email", instanceOf(String.class));
+        step("Отправляем GET запрос для получения пользователя и проверяем контракт API", () -> {
+            given()
+                .when()
+                    .get("/users/1")
+                .then()
+                    .statusCode(200)
+                    .body(matchesJsonSchemaInClasspath(SchemaValidator.getUserSchemaPath()))
+                    .body("id", instanceOf(Integer.class))
+                    .body("name", instanceOf(String.class))
+                    .body("username", instanceOf(String.class))
+                    .body("email", instanceOf(String.class));
+        });
     }
 }

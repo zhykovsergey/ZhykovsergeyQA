@@ -13,7 +13,7 @@ import utils.SchemaValidator;
 import static io.restassured.RestAssured.given;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static io.qameta.allure.Allure.step;
 
 /**
  * API тесты для работы с комментариями
@@ -30,17 +30,19 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Получить все комментарии")
     @Description("Проверяем получение списка всех комментариев")
     public void testGetAllComments() {
-        given()
-            .when()
-                .get("/comments")
-            .then()
-                .statusCode(200)
-                .body("size()", greaterThan(0))
-                .body("id", everyItem(notNullValue()))
-                .body("postId", everyItem(notNullValue()))
-                .body("name", everyItem(notNullValue()))
-                .body("email", everyItem(notNullValue()))
-                .body("body", everyItem(notNullValue()));
+        step("Отправляем GET запрос для получения всех комментариев", () -> {
+            given()
+                .when()
+                    .get("/comments")
+                .then()
+                    .statusCode(200)
+                    .body("size()", greaterThan(0))
+                    .body("id", everyItem(notNullValue()))
+                    .body("postId", everyItem(notNullValue()))
+                    .body("name", everyItem(notNullValue()))
+                    .body("email", everyItem(notNullValue()))
+                    .body("body", everyItem(notNullValue()));
+        });
     }
 
     @Test
@@ -49,17 +51,19 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Получить комментарий по ID")
     @Description("Проверяем получение конкретного комментария")
     public void testGetCommentById() {
-        given()
-            .when()
-                .get("/comments/1")
-            .then()
-                .statusCode(200)
-                .body(matchesJsonSchemaInClasspath(SchemaValidator.getCommentSchemaPath()))
-                .body("id", equalTo(1))
-                .body("postId", notNullValue())
-                .body("name", notNullValue())
-                .body("email", notNullValue())
-                .body("body", notNullValue());
+        step("Отправляем GET запрос для получения комментария с ID = 1", () -> {
+            given()
+                .when()
+                    .get("/comments/1")
+                .then()
+                    .statusCode(200)
+                    .body(matchesJsonSchemaInClasspath(SchemaValidator.getCommentSchemaPath()))
+                    .body("id", equalTo(1))
+                    .body("postId", notNullValue())
+                    .body("name", notNullValue())
+                    .body("email", notNullValue())
+                    .body("body", notNullValue());
+        });
     }
 
     @Test
@@ -68,17 +72,19 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Получить комментарии к посту")
     @Description("Проверяем получение комментариев для конкретного поста")
     public void testGetCommentsByPostId() {
-        given()
-            .when()
-                .get("/posts/1/comments")
-            .then()
-                .statusCode(200)
-                .body("size()", greaterThan(0))
-                .body("postId", everyItem(equalTo(1)))
-                .body("id", everyItem(notNullValue()))
-                .body("name", everyItem(notNullValue()))
-                .body("email", everyItem(notNullValue()))
-                .body("body", everyItem(notNullValue()));
+        step("Отправляем GET запрос для получения комментариев к посту с ID = 1", () -> {
+            given()
+                .when()
+                    .get("/posts/1/comments")
+                .then()
+                    .statusCode(200)
+                    .body("size()", greaterThan(0))
+                    .body("postId", everyItem(equalTo(1)))
+                    .body("id", everyItem(notNullValue()))
+                    .body("name", everyItem(notNullValue()))
+                    .body("email", everyItem(notNullValue()))
+                    .body("body", everyItem(notNullValue()));
+        });
     }
 
     @Test
@@ -87,20 +93,22 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Создать новый комментарий")
     @Description("Проверяем создание нового комментария")
     public void testCreateComment() {
-        Comment newComment = Comment.createTestComment();
-        
-        given()
-            .contentType("application/json")
-            .body(newComment)
-            .when()
-                .post("/comments")
-            .then()
-                .statusCode(201)
-                .body("id", notNullValue())
-                .body("postId", equalTo(newComment.getPostId()))
-                .body("name", equalTo(newComment.getName()))
-                .body("email", equalTo(newComment.getEmail()))
-                .body("body", equalTo(newComment.getBody()));
+        step("Создаем новый комментарий", () -> {
+            Comment newComment = Comment.createTestComment();
+            
+            given()
+                .contentType("application/json")
+                .body(newComment)
+                .when()
+                    .post("/comments")
+                .then()
+                    .statusCode(201)
+                    .body("id", notNullValue())
+                    .body("postId", equalTo(newComment.getPostId()))
+                    .body("name", equalTo(newComment.getName()))
+                    .body("email", equalTo(newComment.getEmail()))
+                    .body("body", equalTo(newComment.getBody()));
+        });
     }
 
     @Test
@@ -109,25 +117,27 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Обновить комментарий")
     @Description("Проверяем обновление существующего комментария")
     public void testUpdateComment() {
-        Comment updatedComment = Comment.builder()
-                .id(1)
-                .postId(1)
-                .name("Updated Commenter")
-                .email("updated@example.com")
-                .body("Updated comment body")
-                .build();
-        
-        given()
-            .contentType("application/json")
-            .body(updatedComment)
-            .when()
-                .put("/comments/1")
-            .then()
-                .statusCode(200)
-                .body("id", equalTo(1))
-                .body("name", equalTo("Updated Commenter"))
-                .body("email", equalTo("updated@example.com"))
-                .body("body", equalTo("Updated comment body"));
+        step("Обновляем комментарий", () -> {
+            Comment updatedComment = Comment.builder()
+                    .id(1)
+                    .postId(1)
+                    .name("Updated Commenter")
+                    .email("updated@example.com")
+                    .body("Updated comment body")
+                    .build();
+            
+            given()
+                .contentType("application/json")
+                .body(updatedComment)
+                .when()
+                    .put("/comments/1")
+                .then()
+                    .statusCode(200)
+                    .body("id", equalTo(1))
+                    .body("name", equalTo("Updated Commenter"))
+                    .body("email", equalTo("updated@example.com"))
+                    .body("body", equalTo("Updated comment body"));
+        });
     }
 
     // ==================== НЕГАТИВНЫЕ ТЕСТЫ ====================
@@ -138,11 +148,13 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Получить несуществующий комментарий (404)")
     @Description("Проверяем обработку ошибки при запросе несуществующего комментария")
     public void testGetNonExistentComment() {
-        given()
-            .when()
-                .get("/comments/999999")
-            .then()
-                .statusCode(404);
+        step("Отправляем GET запрос для получения несуществующего комментария", () -> {
+            given()
+                .when()
+                    .get("/comments/999999")
+                .then()
+                    .statusCode(404);
+        });
     }
 
     @Test
@@ -151,27 +163,29 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Создать комментарий с невалидными данными")
     @Description("Проверяем поведение JSONPlaceholder API при отправке невалидных данных (API принимает любые данные)")
     public void testCreateCommentWithInvalidData() {
-        Comment invalidComment = Comment.builder()
-                .postId(null)
-                .name("")
-                .email("invalid-email")
-                .body("")
-                .build();
-        
-        // JSONPlaceholder - это mock API, которое принимает любые данные
-        // и всегда возвращает 201, даже для невалидных данных
-        given()
-            .contentType("application/json")
-            .body(invalidComment)
-            .when()
-                .post("/comments")
-            .then()
+        step("Тестируем создание комментария с невалидными данными", () -> {
+            Comment invalidComment = Comment.builder()
+                    .postId(null)
+                    .name("")
+                    .email("invalid-email")
+                    .body("")
+                    .build();
+            
+            // JSONPlaceholder - это mock API, которое принимает любые данные
+            // и всегда возвращает 201, даже для невалидных данных
+            given()
+                .contentType("application/json")
+                .body(invalidComment)
+                .when()
+                .post("https://jsonplaceholder.typicode.com/comments")
+                .then()
                 .statusCode(201)  // JSONPlaceholder всегда возвращает 201 для POST
                 .body("id", notNullValue())  // API генерирует ID
                 .body("postId", nullValue())  // null значения сохраняются как есть
                 .body("name", equalTo(""))    // пустые строки сохраняются
                 .body("email", equalTo("invalid-email"))  // невалидный email принимается
                 .body("body", equalTo(""));   // пустое тело сохраняется
+        });
     }
 
     @Test
@@ -180,16 +194,22 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Обновить несуществующий комментарий")
     @Description("Проверяем поведение JSONPlaceholder API при обновлении несуществующего комментария")
     public void testUpdateNonExistentComment() {
-        Comment comment = Comment.createTestComment();
+        step("Подготавливаем данные для обновления", () -> {
+            Comment comment = Comment.createTestComment();
+        });
         
-        // JSONPlaceholder возвращает 500 при попытке обновить несуществующий ресурс
-        given()
-            .contentType("application/json")
-            .body(comment)
-            .when()
-                .put("/comments/999999")
-            .then()
-                .statusCode(500);  // JSONPlaceholder возвращает 500 для несуществующих ресурсов
+        step("Отправляем PUT запрос для обновления несуществующего комментария", () -> {
+            Comment comment = Comment.createTestComment();
+            
+            // JSONPlaceholder возвращает 500 при попытке обновить несуществующий ресурс
+            given()
+                .contentType("application/json")
+                .body(comment)
+                .when()
+                    .put("/comments/999999")
+                .then()
+                    .statusCode(500);  // JSONPlaceholder возвращает 500 для несуществующих ресурсов
+        });
     }
 
     @Test
@@ -198,12 +218,14 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Удалить несуществующий комментарий")
     @Description("Проверяем поведение JSONPlaceholder API при удалении несуществующего комментария")
     public void testDeleteNonExistentComment() {
-        // JSONPlaceholder возвращает 200 даже при удалении несуществующего ресурса
-        given()
-            .when()
-                .delete("/comments/999999")
-            .then()
-                .statusCode(200);  // JSONPlaceholder всегда возвращает 200 для DELETE
+        step("Отправляем DELETE запрос для удаления несуществующего комментария", () -> {
+            // JSONPlaceholder возвращает 200 даже при удалении несуществующего ресурса
+            given()
+                .when()
+                    .delete("/comments/999999")
+                .then()
+                    .statusCode(200);  // JSONPlaceholder всегда возвращает 200 для DELETE
+        });
     }
 
     // ==================== ПАРАМЕТРИЗОВАННЫЕ ТЕСТЫ ====================
@@ -215,16 +237,18 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Получить комментарий по ID (параметризованный)")
     @Description("Проверяем получение комментариев с разными ID")
     public void testGetCommentById(int commentId) {
-        given()
-            .when()
-                .get("/comments/" + commentId)
-            .then()
-                .statusCode(200)
-                .body("id", equalTo(commentId))
-                .body("postId", notNullValue())
-                .body("name", notNullValue())
-                .body("email", notNullValue())
-                .body("body", notNullValue());
+        step("Отправляем GET запрос для получения комментария с ID = " + commentId, () -> {
+            given()
+                .when()
+                    .get("/comments/" + commentId)
+                .then()
+                    .statusCode(200)
+                    .body("id", equalTo(commentId))
+                    .body("postId", notNullValue())
+                    .body("name", notNullValue())
+                    .body("email", notNullValue())
+                    .body("body", notNullValue());
+        });
     }
 
     @ParameterizedTest
@@ -234,16 +258,18 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Получить комментарии к посту (параметризованный)")
     @Description("Проверяем получение комментариев для разных постов")
     public void testGetCommentsByPostId(int postId) {
-        given()
-            .when()
-                .get("/posts/" + postId + "/comments")
-            .then()
-                .statusCode(200)
-                .body("postId", everyItem(equalTo(postId)))
-                .body("id", everyItem(notNullValue()))
-                .body("name", everyItem(notNullValue()))
-                .body("email", everyItem(notNullValue()))
-                .body("body", everyItem(notNullValue()));
+        step("Отправляем GET запрос для получения комментариев к посту с ID = " + postId, () -> {
+            given()
+                .when()
+                    .get("/posts/" + postId + "/comments")
+                .then()
+                    .statusCode(200)
+                    .body("postId", everyItem(equalTo(postId)))
+                    .body("id", everyItem(notNullValue()))
+                    .body("name", everyItem(notNullValue()))
+                    .body("email", everyItem(notNullValue()))
+                    .body("body", everyItem(notNullValue()));
+        });
     }
 
     // ==================== ТЕСТЫ ПРОИЗВОДИТЕЛЬНОСТИ ====================
@@ -254,12 +280,14 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Проверка времени ответа для комментариев")
     @Description("Проверяем, что API комментариев отвечает в разумное время")
     public void testCommentsResponseTime() {
-        given()
-            .when()
-                .get("/comments")
-            .then()
-                .statusCode(200)
-                .time(lessThan(2000L)); // Ответ должен быть быстрее 2 секунд
+        step("Отправляем GET запрос для получения всех комментариев и проверяем время ответа", () -> {
+            given()
+                .when()
+                    .get("/comments")
+                .then()
+                    .statusCode(200)
+                    .time(lessThan(2000L)); // Ответ должен быть быстрее 2 секунд
+        });
     }
 
     @Test
@@ -268,12 +296,14 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Проверка времени ответа для конкретного комментария")
     @Description("Проверяем время ответа при получении конкретного комментария")
     public void testCommentResponseTime() {
-        given()
-            .when()
-                .get("/comments/1")
-            .then()
-                .statusCode(200)
-                .time(lessThan(1000L)); // Ответ должен быть быстрее 1 секунды
+        step("Отправляем GET запрос для получения конкретного комментария и проверяем время ответа", () -> {
+            given()
+                .when()
+                    .get("/comments/1")
+                .then()
+                    .statusCode(200)
+                    .time(lessThan(1000L)); // Ответ должен быть быстрее 1 секунды
+        });
     }
 
     // ==================== CONTRACT TESTS ====================
@@ -284,17 +314,19 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Проверка контракта API для комментария")
     @Description("Проверяем, что API комментария соответствует ожидаемому контракту")
     public void testCommentContract() {
-        given()
-            .when()
-                .get("/comments/1")
-            .then()
-                .statusCode(200)
-                .body(matchesJsonSchemaInClasspath(SchemaValidator.getCommentSchemaPath()))
-                .body("id", instanceOf(Integer.class))
-                .body("postId", instanceOf(Integer.class))
-                .body("name", instanceOf(String.class))
-                .body("email", instanceOf(String.class))
-                .body("body", instanceOf(String.class));
+        step("Отправляем GET запрос для получения комментария и проверяем контракт API", () -> {
+            given()
+                .when()
+                    .get("/comments/1")
+                .then()
+                    .statusCode(200)
+                    .body(matchesJsonSchemaInClasspath(SchemaValidator.getCommentSchemaPath()))
+                    .body("id", instanceOf(Integer.class))
+                    .body("postId", instanceOf(Integer.class))
+                    .body("name", instanceOf(String.class))
+                    .body("email", instanceOf(String.class))
+                    .body("body", instanceOf(String.class));
+        });
     }
 
     @Test
@@ -303,16 +335,18 @@ public class CommentsApiTest extends BaseTest {
     @DisplayName("Проверка контракта API для списка комментариев")
     @Description("Проверяем, что API списка комментариев соответствует контракту")
     public void testCommentsListContract() {
-        given()
-            .when()
-                .get("/comments")
-            .then()
-                .statusCode(200)
-                .body("", instanceOf(java.util.List.class))
-                .body("id", everyItem(instanceOf(Integer.class)))
-                .body("postId", everyItem(instanceOf(Integer.class)))
-                .body("name", everyItem(instanceOf(String.class)))
-                .body("email", everyItem(instanceOf(String.class)))
-                .body("body", everyItem(instanceOf(String.class)));
+        step("Отправляем GET запрос для получения списка комментариев и проверяем контракт API", () -> {
+            given()
+                .when()
+                    .get("/comments")
+                .then()
+                    .statusCode(200)
+                    .body("", instanceOf(java.util.List.class))
+                    .body("id", everyItem(instanceOf(Integer.class)))
+                    .body("postId", everyItem(instanceOf(Integer.class)))
+                    .body("name", everyItem(instanceOf(String.class)))
+                    .body("email", everyItem(instanceOf(String.class)))
+                    .body("body", everyItem(instanceOf(String.class)));
+        });
     }
 }

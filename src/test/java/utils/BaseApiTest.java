@@ -57,15 +57,19 @@ public abstract class BaseApiTest {
         RestAssured.reset();
         
         // Прикрепляем метрики к каждому тесту
-        AllureUtils.addMemoryMetrics();
-        AllureUtils.addTimestamp();
+        Allure.addAttachment("Memory Metrics", "text/plain", 
+            "Free Memory: " + Runtime.getRuntime().freeMemory() + " bytes\n" +
+            "Total Memory: " + Runtime.getRuntime().totalMemory() + " bytes\n" +
+            "Max Memory: " + Runtime.getRuntime().maxMemory() + " bytes");
+        Allure.addAttachment("Test Timestamp", "text/plain", 
+            "Test started at: " + java.time.LocalDateTime.now());
         
         // Прикрепляем информацию о тесте
         String testInfo = String.format(
             "Test Class: %s\nTest Method: %s\nStart Time: %s\nEnvironment: %s",
             this.getClass().getSimpleName(),
             "Current Test Method",
-            AllureUtils.getCurrentTimestamp(),
+            java.time.LocalDateTime.now().toString(),
             Config.getEnvironment()
         );
         Allure.addAttachment("Test Information", "text/plain", testInfo);
@@ -82,7 +86,7 @@ public abstract class BaseApiTest {
             endpoint,
             RestAssured.baseURI,
             endpoint,
-            AllureUtils.getCurrentTimestamp()
+            java.time.LocalDateTime.now().toString()
         );
         Allure.addAttachment("API Request", "text/plain", requestInfo);
     }
@@ -96,13 +100,13 @@ public abstract class BaseApiTest {
             "Status Code: %d\nResponse Body: %s\nTimestamp: %s",
             statusCode,
             responseBody,
-            AllureUtils.getCurrentTimestamp()
+            java.time.LocalDateTime.now().toString()
         );
         Allure.addAttachment("API Response", "text/plain", responseInfo);
         
         // Прикрепляем JSON ответ отдельно для лучшей читаемости
         if (responseBody != null && responseBody.trim().startsWith("{")) {
-            AllureUtils.attachJson(responseBody);
+            Allure.addAttachment("JSON Response", "application/json", responseBody);
         }
     }
 
@@ -111,8 +115,13 @@ public abstract class BaseApiTest {
      */
     protected void attachExecutionMetrics() {
         long testEndTime = System.currentTimeMillis();
-        AllureUtils.addExecutionTime(testStartTime, testEndTime);
-        AllureUtils.addMemoryMetrics();
+        long executionTime = testEndTime - testStartTime;
+        Allure.addAttachment("Execution Time", "text/plain", 
+            "Test execution time: " + executionTime + " ms");
+        Allure.addAttachment("Memory Metrics", "text/plain", 
+            "Free Memory: " + Runtime.getRuntime().freeMemory() + " bytes\n" +
+            "Total Memory: " + Runtime.getRuntime().totalMemory() + " bytes\n" +
+            "Max Memory: " + Runtime.getRuntime().maxMemory() + " bytes");
     }
 
     /**
@@ -124,7 +133,7 @@ public abstract class BaseApiTest {
             endpoint,
             error.getClass().getSimpleName(),
             error.getMessage(),
-            AllureUtils.getCurrentTimestamp()
+            java.time.LocalDateTime.now().toString()
         );
         Allure.addAttachment("API Error", "text/plain", errorInfo);
     }

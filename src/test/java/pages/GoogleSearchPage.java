@@ -102,4 +102,18 @@ public class GoogleSearchPage extends BasePage {
     public String getPageTitle() {
         return driver.getTitle();
     }
+
+    @Step("Получить количество результатов поиска")
+    public int getSearchResultsCount() {
+        try {
+            return driver.findElements(org.openqa.selenium.By.cssSelector("h3")).size();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    @Step("Проверить отображение логотипа Google")
+    public boolean isLogoDisplayed() {
+        return isElementDisplayed(googleLogo);
+    }
 }

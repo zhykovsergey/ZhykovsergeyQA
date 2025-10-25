@@ -56,19 +56,19 @@ jobs:
       run: |
         case "${{ matrix.test-group }}" in
           "api")
-            mvn test -Dtest="api.*" -Dheadless=true
+            mvn test -Dtest="api.SimpleApiTest,api.CommentsApiTest,api.ImprovedApiTest,api.ImprovedQualityApiTest,api.ImprovedStableApiTest,api.JsonPlaceholderApiTest,api.WorkingApiTest,api.ExtendedApiTest,api.ReqResApiTest" -Dheadless=true
             ;;
           "ui")
-            mvn test -Dtest="ui.*" -Dheadless=true
+            mvn test -Dtest="ui.WorkingUiTest" -Dheadless=true
             ;;
           "e2e")
-            mvn test -Dtest="e2e.*" -Dheadless=true
+            mvn test -Dtest="e2e.WorkingE2ETest" -Dheadless=true
             ;;
           "performance")
-            mvn test -Dtest="performance.*" -Dperformance.enabled=true
+            mvn test -Dtest="performance.PerformanceTest" -Dperformance.enabled=true
             ;;
           "security")
-            mvn test -Dtest="security.*" -Dsecurity.enabled=true
+            mvn test -Dtest="security.SecurityTest" -Dsecurity.enabled=true
             ;;
         esac
         

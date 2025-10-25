@@ -175,6 +175,8 @@
                         <exclude>**/ui/**/*Tests.java</exclude>
                         <exclude>**/e2e/**/*Test.java</exclude>
                         <exclude>**/e2e/**/*Tests.java</exclude>
+                        <exclude>**/datadriven/**/*Test.java</exclude>
+                        <exclude>**/datadriven/**/*Tests.java</exclude>
                     </excludes>
                     <!-- Настройки параллельного выполнения -->
                     <parallel>methods</parallel>

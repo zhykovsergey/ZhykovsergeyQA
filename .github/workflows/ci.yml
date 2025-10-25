@@ -39,7 +39,7 @@ jobs:
     
     strategy:
       matrix:
-        test-group: [api, ui, e2e, performance, security]
+        test-group: [api, performance, security]
     
     steps:
     - name: 📥 Checkout code

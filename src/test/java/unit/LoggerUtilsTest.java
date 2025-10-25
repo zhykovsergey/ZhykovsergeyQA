@@ -294,8 +294,8 @@ public class LoggerUtilsTest {
         LoggerUtils.logAction("Test Action", "Test Context");
         
         String output = outContent.toString();
-        // Проверяем, что время присутствует в формате YYYY-MM-DD HH:mm:ss
-        assertTrue(output.matches(".*\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.*"), 
+        // Проверяем, что время присутствует в формате YYYY-MM-DD HH:mm:ss.SSS
+        assertTrue(output.matches(".*\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}.*"), 
             "Время должно быть в правильном формате");
     }
 }

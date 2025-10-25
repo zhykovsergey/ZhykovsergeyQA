@@ -72,10 +72,6 @@ public class WebDriverUtils {
         options.addArguments("--disable-web-security");
         options.addArguments("--disable-features=VizDisplayCompositor");
         
-        // Добавляем уникальный user-data-dir для CI/CD среды
-        String uniqueUserDataDir = "/tmp/chrome-user-data-" + System.currentTimeMillis() + "-" + Thread.currentThread().getId();
-        options.addArguments("--user-data-dir=" + uniqueUserDataDir);
-        
         // Дополнительные аргументы для стабильности в CI/CD
         options.addArguments("--disable-background-timer-throttling");
         options.addArguments("--disable-backgrounding-occluded-windows");
@@ -84,6 +80,22 @@ public class WebDriverUtils {
         options.addArguments("--disable-ipc-flooding-protection");
         options.addArguments("--remote-debugging-port=0");
         options.addArguments("--disable-background-networking");
+        options.addArguments("--disable-sync");
+        options.addArguments("--disable-default-apps");
+        options.addArguments("--disable-component-extensions-with-background-pages");
+        options.addArguments("--disable-background-mode");
+        options.addArguments("--disable-client-side-phishing-detection");
+        options.addArguments("--disable-hang-monitor");
+        options.addArguments("--disable-prompt-on-repost");
+        options.addArguments("--disable-domain-reliability");
+        options.addArguments("--disable-features=VizDisplayCompositor,AudioServiceOutOfProcess");
+        options.addArguments("--force-color-profile=srgb");
+        options.addArguments("--metrics-recording-only");
+        options.addArguments("--no-first-run");
+        options.addArguments("--safebrowsing-disable-auto-update");
+        options.addArguments("--enable-automation");
+        options.addArguments("--password-store=basic");
+        options.addArguments("--use-mock-keychain");
         
         // Отключаем логи
         System.setProperty("webdriver.chrome.silentOutput", "true");
@@ -104,6 +116,35 @@ public class WebDriverUtils {
         }
         options.addArguments("--width=1920");
         options.addArguments("--height=1080");
+        
+        // Дополнительные аргументы для стабильности в CI/CD
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--disable-extensions");
+        options.addArguments("--disable-logging");
+        options.addArguments("--disable-web-security");
+        options.addArguments("--allow-running-insecure-content");
+        options.addArguments("--ignore-certificate-errors");
+        options.addArguments("--ignore-ssl-errors");
+        options.addArguments("--disable-background-timer-throttling");
+        options.addArguments("--disable-backgrounding-occluded-windows");
+        options.addArguments("--disable-renderer-backgrounding");
+        options.addArguments("--disable-features=TranslateUI");
+        options.addArguments("--disable-ipc-flooding-protection");
+        options.addArguments("--disable-background-networking");
+        options.addArguments("--disable-sync");
+        options.addArguments("--disable-default-apps");
+        options.addArguments("--disable-background-mode");
+        options.addArguments("--disable-hang-monitor");
+        options.addArguments("--disable-prompt-on-repost");
+        options.addArguments("--disable-domain-reliability");
+        options.addArguments("--no-first-run");
+        options.addArguments("--enable-automation");
+        
+        // Отключаем логи
+        System.setProperty("webdriver.firefox.silentOutput", "true");
+        System.setProperty("org.slf4j.simpleLogger.log.org.openqa.selenium", "ERROR");
         
         return new FirefoxDriver(options);
     }

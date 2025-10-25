@@ -52,9 +52,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
         
-    - name: 🌐 Set up Chrome
+    - name: 🌐 Set up Firefox
       if: contains(fromJson('["ui", "e2e"]'), matrix.test-group)
-      uses: browser-actions/setup-chrome@v1
+      uses: browser-actions/setup-firefox@v1
       with:
         browser-version: latest
         
@@ -65,10 +65,10 @@ jobs:
             mvn test -Dtest="api.SimpleApiTest,api.CommentsApiTest,api.ImprovedApiTest,api.ImprovedQualityApiTest,api.ImprovedStableApiTest,api.JsonPlaceholderApiTest,api.WorkingApiTest,api.ExtendedApiTest,api.ReqResApiTest" -Dheadless=true
             ;;
           "ui")
-            mvn test -Dtest="ui.WorkingUiTest" -Dheadless=true -DforkCount=1 -DreuseForks=false
+            mvn test -Dtest="ui.WorkingUiTest" -Dheadless=true -DforkCount=1 -DreuseForks=false -Dbrowser=firefox
             ;;
           "e2e")
-            mvn test -Dtest="e2e.WorkingE2ETest" -Dheadless=true
+            mvn test -Dtest="e2e.WorkingE2ETest" -Dheadless=true -Dbrowser=firefox
             ;;
           "performance")
             mvn test -Dtest="performance.PerformanceTest" -Dperformance.enabled=true

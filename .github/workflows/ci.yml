@@ -65,10 +65,10 @@ jobs:
             mvn test -Dtest="api.SimpleApiTest,api.CommentsApiTest,api.ImprovedApiTest,api.ImprovedQualityApiTest,api.ImprovedStableApiTest,api.JsonPlaceholderApiTest,api.WorkingApiTest,api.ExtendedApiTest,api.ReqResApiTest" -Dheadless=true
             ;;
           "ui")
-            mvn test -Dtest="ui.WorkingUiTest" -Dheadless=true -DforkCount=1 -DreuseForks=false -Dbrowser=firefox
+            mvn test -Dtest="ui.WorkingUiTest" -Dui.headless=true -DforkCount=1 -DreuseForks=false -Dui.browser=firefox
             ;;
           "e2e")
-            mvn test -Dtest="e2e.WorkingE2ETest" -Dheadless=true -Dbrowser=firefox
+            mvn test -Dtest="e2e.WorkingE2ETest" -Dui.headless=true -Dui.browser=firefox
             ;;
           "performance")
             mvn test -Dtest="performance.PerformanceTest" -Dperformance.enabled=true

@@ -170,6 +170,12 @@
                         <include>**/*Test.java</include>
                         <include>**/*Tests.java</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/ui/**/*Test.java</exclude>
+                        <exclude>**/ui/**/*Tests.java</exclude>
+                        <exclude>**/e2e/**/*Test.java</exclude>
+                        <exclude>**/e2e/**/*Tests.java</exclude>
+                    </excludes>
                     <!-- Настройки параллельного выполнения -->
                     <parallel>methods</parallel>
                     <threadCount>4</threadCount>

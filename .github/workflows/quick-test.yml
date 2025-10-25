@@ -1,4 +1,4 @@
-name: ⚡ Quick Test (Optimized)
+name: ⚡ Quick Test
 
 on:
   workflow_dispatch:

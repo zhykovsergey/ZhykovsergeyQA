@@ -58,7 +58,11 @@ public class Config {
     }
     
     public static String getBrowser() {
-        return getProperty("ui.browser", "chrome");
+        String browser = getProperty("ui.browser", "chrome");
+        System.out.println("🔧 Config: Получен браузер: " + browser);
+        System.out.println("🔧 Config: Системное свойство ui.browser: " + System.getProperty("ui.browser"));
+        System.out.println("🔧 Config: Переменная окружения UI_BROWSER: " + System.getenv("UI_BROWSER"));
+        return browser;
     }
     
     public static String getWindowSize() {

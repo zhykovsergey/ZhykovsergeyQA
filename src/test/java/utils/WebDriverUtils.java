@@ -25,14 +25,24 @@ public class WebDriverUtils {
     public static WebDriver createWebDriver(boolean headless) {
         String browser = Config.getBrowser().toLowerCase();
         
+        // Отладочная информация
+        System.out.println("🔧 WebDriverUtils: Создаем WebDriver для браузера: " + browser);
+        System.out.println("🔧 WebDriverUtils: Headless режим: " + headless);
+        System.out.println("🔧 WebDriverUtils: Системное свойство ui.browser: " + System.getProperty("ui.browser"));
+        System.out.println("🔧 WebDriverUtils: Переменная окружения UI_BROWSER: " + System.getenv("UI_BROWSER"));
+        
         switch (browser) {
             case "chrome":
+                System.out.println("🔧 WebDriverUtils: Создаем Chrome WebDriver");
                 return createChromeDriver(headless);
             case "firefox":
+                System.out.println("🔧 WebDriverUtils: Создаем Firefox WebDriver");
                 return createFirefoxDriver(headless);
             case "edge":
+                System.out.println("🔧 WebDriverUtils: Создаем Edge WebDriver");
                 return createEdgeDriver(headless);
             default:
+                System.out.println("🔧 WebDriverUtils: Неизвестный браузер '" + browser + "', используем Chrome по умолчанию");
                 return createChromeDriver(headless);
         }
     }
